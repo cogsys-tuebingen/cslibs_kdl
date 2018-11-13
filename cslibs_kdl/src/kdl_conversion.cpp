@@ -78,7 +78,9 @@ Eigen::Matrix<double, 6, 6> cslibs_kdl::convert2EigenWrenchTransform(const KDL::
     Eigen::Matrix<double, 6, 6> result;
     Eigen::Matrix<double, 3, 3> rot = convert2Eigen(frame.M);
     result.block<3,3>(0,0) = rot;
-    result.block<3,3>(0,3) = skewSymMat(frame.p) * rot;
+    Eigen::Matrix<double, 3, 3>px = skewSymMat(frame.p);
+    Eigen::Matrix<double, 3, 3> px_rot = px * rot;
+    result.block<3,3>(0,3) = px_rot;
     result.block<3,3>(3,0).setZero();
     result.block<3,3>(3,3) = rot;
     return result;

@@ -61,28 +61,34 @@ void ExternalForcesSerialChain::setModel(const std::string &robot_model,
     set_model_ = true;
     init_sensor_mat_ = false;
 }
-
-void ExternalForcesSerialChain::getGeometricJacobianTransposed(const cslibs_kdl_data::JointStateData &state, std::size_t n_joints, Eigen::MatrixXd &result) const
+void ExternalForcesSerialChain::getGeometricJacobianTransposed(const std::vector<double>& pos,
+                                    std::size_t n_joints,
+                                    Eigen::MatrixXd& result ) const
 {
     std::size_t max = n_joints;
     if(n_joints > n_joints_){
         max = n_joints_;
     }
     result.setZero(max, 6);
-
+    std::string frame_end = link_names_[max -1];
     for(std::size_t row = 0; row < max; ++row){
         std::string link = link_names_[row];
         KDL::Frame T0i;
-        model_.getFKPose(state.position, T0i, link);
+        model_.getFKPose(pos, T0i, link);
 //        KDL::Vector rot_axis = rot_axis_[row];
         KDL::Frame T0j;
-        model_.getFKPose(state.position, T0j, link_names_[max -1]);
+        model_.getFKPose(pos, T0j, frame_end);
         KDL::Frame Tij = T0i.Inverse() * T0j;
         Eigen::Matrix<double, 6, 6> T = cslibs_kdl::convert2EigenWrenchTransform(Tij);
         Eigen::Matrix<double,1,6> si = sensor_mat_.block(row,6*row,1,6);
         Eigen::Matrix<double,1,6>  column = si * T;
         result.block(row,0,1,6) =  column;
     }
+}
+
+void ExternalForcesSerialChain::getGeometricJacobianTransposed(const cslibs_kdl_data::JointStateData &state, std::size_t n_joints, Eigen::MatrixXd &result) const
+{
+    getGeometricJacobianTransposed(state.position, n_joints, result);
 }
 
 void ExternalForcesSerialChain::getWrenchProjetion(const cslibs_kdl_data::JointStateData& state, Eigen::MatrixXd& result ) const
@@ -151,19 +157,17 @@ bool ExternalForcesSerialChain::getJacobian(const cslibs_kdl_data::JointStateDat
     return succ;
 }
 
-
-Eigen::VectorXd ExternalForcesSerialChain::getExternalTorques(const cslibs_kdl_data::JointStateData &state,
+Eigen::VectorXd ExternalForcesSerialChain::getExternalTorques(const std::vector<double>& pos,
                                    std::string frame_id,
-                                   const KDL::Wrench& w) const
+                                   const KDL::Wrench &w) const
 {
-
     Eigen::MatrixXd J;
     KDL::Wrench wt = w;
 
     std::string frame = frame_id;
     if(frame_id.find("finger") != std::string::npos ){
         frame = chain_tip_;
-        KDL::Frame hTf = getFKPose(state, chain_tip_);
+        KDL::Frame hTf = getFKPose(pos, chain_tip_);
         wt = hTf * wt;
     }
 
@@ -174,7 +178,7 @@ Eigen::VectorXd ExternalForcesSerialChain::getExternalTorques(const cslibs_kdl_d
         throw std::runtime_error("Cannot find link id for " + frame_id);
     }
 
-    getGeometricJacobianTransposed(state,index +1, J);
+    getGeometricJacobianTransposed(pos,index +1, J);
 
     //        geometry_msgs::WrenchStamped msg;
     //        msg.wrench.force.x = n_i.force.x();
@@ -193,14 +197,15 @@ Eigen::VectorXd ExternalForcesSerialChain::getExternalTorques(const cslibs_kdl_d
     return res;
 }
 
-Eigen::VectorXd ExternalForcesSerialChain::getExternalTorquesKDL(const cslibs_kdl_data::JointStateData &state, std::string frame_id, KDL::Wrench& w_local) const
+Eigen::VectorXd ExternalForcesSerialChain::getExternalTorquesKDL(const std::vector<double>& pos,
+                                      std::string frame_id, KDL::Wrench &w_local) const
 {
     std::string frame = frame_id;
     KDL::Wrench wchain = w_local;
     // if local frame is a finger frame project wrench to finger frame
     if(frame_id.find("finger") != std::string::npos ){
         frame = chain_tip_;
-        KDL::Frame hTf = getFKPose(state, chain_tip_);
+        KDL::Frame hTf = getFKPose(pos, chain_tip_);
         wchain = hTf * wchain;
     }
 
@@ -210,10 +215,10 @@ Eigen::VectorXd ExternalForcesSerialChain::getExternalTorquesKDL(const cslibs_kd
     }
 
     // rotate wrench in to base frame coordinates
-    KDL::Frame baseTframe = getFKPose(state, frame_id);
+    KDL::Frame baseTframe = getFKPose(pos, frame_id);
     KDL::Wrench w_in(baseTframe.M * wchain.force, baseTframe.M * wchain.torque);
 
-    KDL::Jacobian jac = model_.getJacobian(state.position, index +1);
+    KDL::Jacobian jac = model_.getJacobian(pos, index +1);
     Eigen::MatrixXd jac_t = jac.data.transpose();
     Eigen::Matrix<double, 6, 1> ft;
     ft << w_in.force(0) ,  w_in.force(1) ,w_in.force(2),
@@ -222,34 +227,54 @@ Eigen::VectorXd ExternalForcesSerialChain::getExternalTorquesKDL(const cslibs_kd
     return tau;
 }
 
-KDL::Frame ExternalForcesSerialChain::getFKPose(const cslibs_kdl_data::JointStateData &state, const std::string& link) const
+Eigen::VectorXd ExternalForcesSerialChain::getExternalTorques(const cslibs_kdl_data::JointStateData &state,
+                                   std::string frame_id,
+                                   const KDL::Wrench& w) const
+{
+
+    return getExternalTorques(state.position, frame_id, w);
+}
+
+Eigen::VectorXd ExternalForcesSerialChain::getExternalTorquesKDL(const cslibs_kdl_data::JointStateData &state, std::string frame_id, KDL::Wrench& w_local) const
+{
+    return getExternalTorquesKDL(state.position, frame_id, w_local);
+}
+
+KDL::Frame ExternalForcesSerialChain::getFKPose(const std::vector<double>& position, const std::string& link) const
 {
     KDL::Frame res;
     int ec = 0;
+    auto getQvec = [](const std::vector<double>& pos, const std::size_t& n_joints, const std::size_t offset){
+         std::vector<double> q(2,0);
+        if(pos.size() > n_joints + offset){
+            q[0] = pos[n_joints + offset];
+        }
+        return q;
+    };
     if(link.find("finger") == std::string::npos){
-        ec = model_.getFKPose(state.position, res, link);
+        ec = model_.getFKPose(position, res, link);
     }
     else if(link.find("1") != std::string::npos ){
         KDL::Frame hand;
         KDL::Frame f1;
-        ec = model_.getFKPose(state.position, hand, model_.getTipLink());
-        std::vector<double> q(2,0);
+        ec = model_.getFKPose(position, hand, model_.getTipLink());
+        std::vector<double> q = getQvec(position, n_joints_, 0);
         ec *= model_f1_.getFKPose(q, f1, link);
         res = hand * f1;
     }
     else if(link.find("2") != std::string::npos ){
         KDL::Frame hand;
         KDL::Frame f2;
-        ec = model_.getFKPose(state.position, hand, model_.getTipLink());
-        std::vector<double> q(2,0);
+        ec = model_.getFKPose(position, hand, model_.getTipLink());
+        std::vector<double> q = getQvec(position, n_joints_, 1);
         ec *= model_f2_.getFKPose(q, f2, link);
         res = hand * f2;
     }
     else if(link.find("3") != std::string::npos ){
         KDL::Frame hand;
         KDL::Frame f3;
-        ec = model_.getFKPose(state.position, hand, model_.getTipLink());
-        std::vector<double> q(2,0);
+        ec = model_.getFKPose(position, hand, model_.getTipLink());
+        std::vector<double> q = getQvec(position, n_joints_, 3);
         ec *= model_f3_.getFKPose(q, f3, link);
         res = hand * f3;
     }
@@ -257,5 +282,10 @@ KDL::Frame ExternalForcesSerialChain::getFKPose(const cslibs_kdl_data::JointStat
         throw std::runtime_error("can not compute forwad kinematics.");
     }
     return res;
+}
+
+KDL::Frame ExternalForcesSerialChain::getFKPose(const cslibs_kdl_data::JointStateData &state, const std::string& link) const
+{
+    return getFKPose(state.position, link);
 }
 

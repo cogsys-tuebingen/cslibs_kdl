@@ -3,9 +3,16 @@
 
 #include <cslibs_kdl/dynamic_model.h>
 #include <cslibs_kdl_data/joint_state_data.h>
-#include <Eigen/Core>
+#include <eigen3/Eigen/Dense>
 
 namespace cslibs_kdl {
+/**
+ * @brief The ExternalForcesSerialChain class
+ * Calculates Joint torques for a external wrench acting on the manipulator.
+ * The manipulator consits of a serial chain with n joints and 3 parallel finger chains at the endeffector.
+ * It is expected that the 3 finger chain contain the string "finger" in the frame_ids.
+ * For other chains this class could be generalized.
+ */
 class ExternalForcesSerialChain
 {
 public:
@@ -22,6 +29,10 @@ public:
                   const std::string &finger_1_tip,
                   const std::string &finger_2_tip,
                   const std::string &finger_3_tip);
+
+    void getGeometricJacobianTransposed(const std::vector<double>& pos,
+                                        std::size_t up_to_joint,
+                                        Eigen::MatrixXd& result ) const;
 
     void getGeometricJacobianTransposed(const cslibs_kdl_data::JointStateData& state,
                                         std::size_t up_to_joint,
@@ -46,11 +57,18 @@ public:
     void getWrenchProjetion(const cslibs_kdl_data::JointStateData& state,
                             std::size_t up_to_joint,
                             Eigen::MatrixXd& result ) const;
+    KDL::Frame getFKPose(const std::vector<double> &pos, const std::string& link) const;
     KDL::Frame getFKPose(const cslibs_kdl_data::JointStateData &state, const std::string& link) const;
 
+    Eigen::VectorXd getExternalTorques(const std::vector<double>& pos,
+                                       std::string frame_id,
+                                       const KDL::Wrench &w) const;
     Eigen::VectorXd getExternalTorques(const cslibs_kdl_data::JointStateData &state,
                                        std::string frame_id,
                                        const KDL::Wrench &w) const;
+
+    Eigen::VectorXd getExternalTorquesKDL(const std::vector<double>& pos,
+                                          std::string frame_id, KDL::Wrench &w_local) const;
     Eigen::VectorXd getExternalTorquesKDL(const cslibs_kdl_data::JointStateData& state,
                                           std::string frame_id, KDL::Wrench &w_local) const ;
 
@@ -77,7 +95,7 @@ protected:
     //    double arm_length_;
     //    double l_last_link_;
     std::string end_eff_frame_;
-    tf::Transform end_eff_trans_;
+//    tf::Transform end_eff_trans_;
     std::string robot_model_;
     std::string chain_root_;
     std::string chain_tip_;

@@ -51,7 +51,10 @@ KinematicModel::KinematicModel(const std::string &robot_model, const std::string
         node_handle.param(full_urdf_xml,xml_string,std::string());
         robot_model_.initString(xml_string);
     }
-    initialize();
+    bool init = initialize();
+    if(!init){
+        throw std::runtime_error("Could not initialize FK");
+    }
 
     ROS_DEBUG_STREAM_NAMED("KinematicModel",
                            "Number of Joints: " << chain_.getNrOfJoints() <<

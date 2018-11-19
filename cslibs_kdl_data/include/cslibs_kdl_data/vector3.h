@@ -1,5 +1,5 @@
-#ifndef VECTOR3STAMPED_H
-#define VECTOR3STAMPED_H
+#ifndef CS_VECTOR3STAMPED_H
+#define CS_VECTOR3STAMPED_H
 #include <vector>
 #include <Eigen/Dense>
 #include <cslibs_kdl_data/time_stamp.h>
@@ -58,4 +58,4 @@ inline Vector3 operator*(double val , const Vector3& v)
 }
 
 }
-#endif // VECTOR3STAMPED_H
+#endif // CS_VECTOR3STAMPED_H

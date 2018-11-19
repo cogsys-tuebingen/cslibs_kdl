@@ -1,5 +1,5 @@
-#ifndef JOINT_ANGLES_H
-#define JOINT_ANGLES_H
+#ifndef CS_JOINT_ANGLES_H
+#define CS_JOINT_ANGLES_H
 #include <vector>
 #include <cslibs_kdl_data/joint_data.h>
 
@@ -23,4 +23,4 @@ private:
 
 };
 }
-#endif // JOINT_ANGLES_H
+#endif // CS_JOINT_ANGLES_H

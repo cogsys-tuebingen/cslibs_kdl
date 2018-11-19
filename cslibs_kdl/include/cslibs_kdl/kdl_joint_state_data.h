@@ -1,5 +1,5 @@
-#ifndef KDLJOINTSTATEDATA_H
-#define KDLJOINTSTATEDATA_H
+#ifndef CS_KDLJOINTSTATEDATA_H
+#define CS_KDLJOINTSTATEDATA_H
 #include <cslibs_kdl_data/suppress_warnings_start.h>
 #include <kdl/jntarray.hpp>
 #include <cslibs_kdl_data/suppress_warnings_end.h>
@@ -35,4 +35,4 @@ public:
     KDL::JntArray torque;
 };
 }
-#endif // KDLJOINTSTATEDATA_H
+#endif // CS_KDLJOINTSTATEDATA_H

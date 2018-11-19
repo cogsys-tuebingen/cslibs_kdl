@@ -1,5 +1,5 @@
-#ifndef HEADER_H
-#define HEADER_H
+#ifndef CS_HEADER_H
+#define CS_HEADER_H
 
 #include <string>
 #include <cslibs_kdl_data/time_stamp.h>
@@ -46,4 +46,4 @@ struct Header{
     std::string frame_id;
 };
 }
-#endif // HEADER_H
+#endif // CS_HEADER_H

@@ -132,9 +132,15 @@ void ExternalForcesSerialChain::getWrenchProjetion(const cslibs_kdl_data::JointS
     }
 }
 
-Eigen::MatrixXd ExternalForcesSerialChain::getJacobian(const cslibs_kdl_data::JointStateData &state)
+Eigen::MatrixXd ExternalForcesSerialChain::getJacobian(const std::vector<double> &pos, int id)
 {
-    return model_.getJacobian(state.position).data;
+
+    return model_.getJacobian(pos, id).data;
+}
+
+Eigen::MatrixXd ExternalForcesSerialChain::getJacobian(const cslibs_kdl_data::JointStateData &state, int id)
+{
+    return model_.getJacobian(state.position, id).data;
 }
 
 bool ExternalForcesSerialChain::getJacobian(const cslibs_kdl_data::JointStateData &state, const std::string &frame, Eigen::MatrixXd& jacobian)
@@ -197,8 +203,7 @@ Eigen::VectorXd ExternalForcesSerialChain::getExternalTorques(const std::vector<
     return res;
 }
 
-Eigen::VectorXd ExternalForcesSerialChain::getExternalTorquesKDL(const std::vector<double>& pos,
-                                      std::string frame_id, KDL::Wrench &w_local) const
+Eigen::VectorXd ExternalForcesSerialChain::getExternalTorquesKDL(const std::vector<double>& pos, std::string frame_id, KDL::Wrench &w_local) const
 {
     std::string frame = frame_id;
     KDL::Wrench wchain = w_local;

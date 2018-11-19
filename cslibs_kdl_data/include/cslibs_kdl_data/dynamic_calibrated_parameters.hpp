@@ -1,5 +1,5 @@
-#ifndef DYNAMIC_CALIBRATED_PARAMETERS_HPP
-#define DYNAMIC_CALIBRATED_PARAMETERS_HPP
+#ifndef CS_DYNAMIC_CALIBRATED_PARAMETERS_HPP
+#define CS_DYNAMIC_CALIBRATED_PARAMETERS_HPP
 #include <string>
 #include <vector>
 #include <Eigen/Core>
@@ -223,5 +223,5 @@ inline std::vector<std::string> getLinkNames(const cslibs_kdl_calibration::Dynam
 
 
 }
-#endif // DYNAMIC_CALIBRATED_PARAMETERS_HPP
+#endif // CS_DYNAMIC_CALIBRATED_PARAMETERS_HPP
 

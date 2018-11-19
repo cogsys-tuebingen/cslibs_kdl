@@ -1,5 +1,5 @@
-#ifndef TYPES_H
-#define TYPES_H
+#ifndef CS_KDL_TYPES_H
+#define CS_KDL_TYPES_H
 
 #include <vector>
 #include <deque>

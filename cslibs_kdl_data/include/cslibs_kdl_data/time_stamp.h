@@ -1,5 +1,5 @@
-#ifndef TIME_STAMP_H
-#define TIME_STAMP_H
+#ifndef CS_TIME_STAMP_H
+#define CS_TIME_STAMP_H
 #include <chrono>
 namespace cslibs_kdl_data {
 
@@ -48,4 +48,4 @@ public:
 };
 
 }
-#endif // TIME_STAMP_H
+#endif // CS_TIME_STAMP_H

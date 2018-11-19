@@ -1,5 +1,5 @@
-#ifndef EXTENDED_JOINT_STATE_DATA_H
-#define EXTENDED_JOINT_STATE_DATA_H
+#ifndef CS_EXTENDED_JOINT_STATE_DATA_H
+#define CS_EXTENDED_JOINT_STATE_DATA_H
 #include <cslibs_kdl_data/joint_state_data.h>
 #include <cslibs_kdl_data/accelerometer_data.h>
 #include <memory>
@@ -57,4 +57,4 @@ public:
     AccelerometerData lin_acc;
 };
 }
-#endif // EXTENDED_JOINT_STATE_DATA_H
+#endif // CS_EXTENDED_JOINT_STATE_DATA_H

@@ -1,5 +1,5 @@
-#ifndef ACCELEROMETER_DATA_H
-#define ACCELEROMETER_DATA_H
+#ifndef CS_ACCELEROMETER_DATA_H
+#define CS_ACCELEROMETER_DATA_H
 #include <cslibs_kdl_data/types.h>
 #include <vector>
 #include <Eigen/StdVector>
@@ -67,4 +67,4 @@ private:
     Vector3StampedCollection lin_acc;
 };
 }
-#endif // ACCELEROMETER_DATA_H
+#endif // CS_ACCELEROMETER_DATA_H

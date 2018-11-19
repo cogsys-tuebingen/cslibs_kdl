@@ -1,5 +1,5 @@
-#ifndef KIN_DYN_DATA_STRUCTS_H
-#define KIN_DYN_DATA_STRUCTS_H
+#ifndef CS_KIN_DYN_DATA_STRUCTS_H
+#define CS_KIN_DYN_DATA_STRUCTS_H
 #include <vector>
 
 namespace cslibs_kdl {
@@ -43,5 +43,5 @@ struct JointState{
 
 
 }
-#endif // KIN_DYN_DATA_STRUCTS_H
+#endif // CS_KIN_DYN_DATA_STRUCTS_H
 

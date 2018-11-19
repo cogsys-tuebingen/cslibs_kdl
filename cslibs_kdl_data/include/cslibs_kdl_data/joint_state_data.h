@@ -1,5 +1,5 @@
-#ifndef JOINT_STATE_DATA_H
-#define JOINT_STATE_DATA_H
+#ifndef CS_JOINT_STATE_DATA_H
+#define CS_JOINT_STATE_DATA_H
 #include <vector>
 #include <Eigen/Core>
 #include <cslibs_kdl_data/types.h>
@@ -68,4 +68,4 @@ public:
     std::vector<double> torque;
 };
 }
-#endif // JOINT_STATE_DATA_H
+#endif // CS_JOINT_STATE_DATA_H

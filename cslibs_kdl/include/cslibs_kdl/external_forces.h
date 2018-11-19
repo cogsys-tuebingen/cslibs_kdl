@@ -1,5 +1,5 @@
-#ifndef EXTERNAL_FORCES_H
-#define EXTERNAL_FORCES_H
+#ifndef CS_EXTERNAL_FORCES_H
+#define CS_EXTERNAL_FORCES_H
 
 #include <cslibs_kdl/dynamic_model.h>
 #include <cslibs_kdl_data/joint_state_data.h>
@@ -72,7 +72,8 @@ public:
     Eigen::VectorXd getExternalTorquesKDL(const cslibs_kdl_data::JointStateData& state,
                                           std::string frame_id, KDL::Wrench &w_local) const ;
 
-    Eigen::MatrixXd getJacobian(const cslibs_kdl_data::JointStateData &state);
+    Eigen::MatrixXd getJacobian(const std::vector<double> &pos, int id =-1);
+    Eigen::MatrixXd getJacobian(const cslibs_kdl_data::JointStateData &state , int id =-1);
     bool getJacobian(const cslibs_kdl_data::JointStateData& state, const std::string& frame, Eigen::MatrixXd &jacobian);
 
     inline std::size_t getNrJoints() const {return n_joints_;}
@@ -105,4 +106,4 @@ protected:
 
 };
 }
-#endif // EXTERNAL_FORCES_H
+#endif // CS_EXTERNAL_FORCES_H

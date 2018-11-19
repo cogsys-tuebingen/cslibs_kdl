@@ -1,5 +1,5 @@
-#ifndef DYNAMIC_CALIBRATION_IO_H
-#define DYNAMIC_CALIBRATION_IO_H
+#ifndef CS_DYNAMIC_CALIBRATION_IO_H
+#define CS_DYNAMIC_CALIBRATION_IO_H
 #include <cslibs_kdl_data/dynamic_calibrated_parameters.hpp>
 
 namespace cslibs_kdl_calibration {

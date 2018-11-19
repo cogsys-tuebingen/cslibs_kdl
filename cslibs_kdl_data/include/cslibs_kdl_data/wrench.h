@@ -1,5 +1,5 @@
-#ifndef WRENCH_H
-#define WRENCH_H
+#ifndef CS_WRENCH_H
+#define CS_WRENCH_H
 #include <cslibs_kdl_data/vector3.h>
 #include <cslibs_kdl_data/stamped_data.h>
 namespace cslibs_kdl_data {
@@ -38,11 +38,11 @@ public:
 
     double norm() const;
     std::vector<double> toVector() const;
-    std::string to_string(const std::string delimiter = std::string(";")) const;
+    std::string to_string(std::string delimiter = std::string(";")) const;
 
 public:
     Vector3 torque;
     Vector3 force;
 };
 }
-#endif // WRENCH_H
+#endif // CS_WRENCH_H

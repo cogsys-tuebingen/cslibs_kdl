@@ -1,5 +1,5 @@
-#ifndef KINEMATICMODEL_H
-#define KINEMATICMODEL_H
+#ifndef CS_KINEMATICMODEL_H
+#define CS_KINEMATICMODEL_H
 //System
 #include <string>
 #include <vector>
@@ -114,7 +114,7 @@ public:
      * @param seg_id identifier of segment default is end effector
      * @return
      */
-    KDL::Jacobian getJacobian(const std::vector<double>& q,int seg_id = -1) const;
+    KDL::Jacobian getJacobian(const std::vector<double>& q, int seg_id = -1) const;
     int getJointVelocities(const std::vector<double> &q, const KDL::Twist &v_in, std::vector<double>& v_out);
     inline const KDL::Tree& getTree() const {return tree_;}
 
@@ -146,4 +146,4 @@ protected:
 };
 }
 
-#endif // KINEMATICMODEL_H
+#endif // CS_KINEMATICMODEL_H

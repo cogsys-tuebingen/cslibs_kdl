@@ -1,5 +1,5 @@
-#ifndef EIGEN_YAML_H
-#define EIGEN_YAML_H
+#ifndef CS_EIGEN_YAML_H
+#define CS_EIGEN_YAML_H
 #include <Eigen/Core>
 #include <yaml-cpp/yaml.h>
 
@@ -196,4 +196,4 @@ struct convert<Eigen::ArrayXd> {
     }
 };
 }
-#endif // EIGEN_YAML_H
+#endif // CS_EIGEN_YAML_H

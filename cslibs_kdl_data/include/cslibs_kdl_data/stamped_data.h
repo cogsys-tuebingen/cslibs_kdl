@@ -1,5 +1,5 @@
-#ifndef STAMPED_DATA_H
-#define STAMPED_DATA_H
+#ifndef CS_STAMPED_DATA_H
+#define CS_STAMPED_DATA_H
 #include <cslibs_kdl_data/header.h>
 namespace cslibs_kdl_data{
 template<typename T>
@@ -150,4 +150,4 @@ public:
     T& data;
 };
 }
-#endif // STAMPED_DATA_H
+#endif // CS_STAMPED_DATA_H

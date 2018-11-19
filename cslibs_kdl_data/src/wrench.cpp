@@ -131,7 +131,7 @@ std::vector<double> Wrench::toVector() const
     return res;
 }
 
-std::string Wrench::to_string(const std::string delimiter) const
+std::string Wrench::to_string(std::string delimiter) const
 {
     return torque.to_string(delimiter) + delimiter + force.to_string(delimiter);
 }

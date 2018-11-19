@@ -1,5 +1,5 @@
-#ifndef JACO2RESIDUALVECTOR_H
-#define JACO2RESIDUALVECTOR_H
+#ifndef CS_RESIDUALVECTOR_H
+#define CS_RESIDUALVECTOR_H
 #include <string>
 #include <cslibs_kdl/dynamic_model.h>
 #include <cslibs_kdl/kin_dyn_data_structs.h>
@@ -66,4 +66,4 @@ private:
     mutable cslibs_kdl_data::TimeStamp last_stamp_;
 };
 }
-#endif // JACO2RESIDUALVECTOR_H
+#endif // CS_RESIDUALVECTOR_H

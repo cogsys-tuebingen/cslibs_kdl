@@ -1,5 +1,5 @@
-#ifndef DynamicModel_H
-#define DynamicModel_H
+#ifndef CS_DynamicModel_H
+#define CS_DynamicModel_H
 //System
 #include <string>
 #include <vector>
@@ -215,4 +215,4 @@ protected:
 };
 }
 
-#endif // DynamicModel_H
+#endif // CS_DynamicModel_H

@@ -1,5 +1,5 @@
-#ifndef RESIDUAL_VECTOR_KALMAN_H
-#define JACO2_RESIDUAL_KALMAN_H
+#ifndef CS_RESIDUAL_VECTOR_KALMAN_H
+#define CS_RESIDUAL_VECTOR_KALMAN_H
 
 #include <vector>
 #include <Eigen/Core>
@@ -30,4 +30,4 @@ private:
 
 };
 
-#endif // RESIDUAL_VECTOR_KALMAN_H
+#endif // CS_RESIDUAL_VECTOR_KALMAN_H

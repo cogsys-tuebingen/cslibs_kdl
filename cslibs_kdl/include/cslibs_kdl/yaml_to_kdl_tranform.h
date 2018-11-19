@@ -1,5 +1,5 @@
-#ifndef YAML_TO_TRANSFORM_CONVERSION_HPP
-#define YAML_TO_TRANSFORM_CONVERSION_HPP
+#ifndef CS_YAML_TO_TRANSFORM_CONVERSION_HPP
+#define CS_YAML_TO_TRANSFORM_CONVERSION_HPP
 #include <vector>
 #include <cslibs_kdl_data/suppress_warnings_start.h>
 #include <tf/tf.h>
@@ -29,5 +29,5 @@ void frames(const std::vector<KDLTransformation>& in, std::vector<KDL::Frame>& o
 
 
 }
-#endif // YAML_TO_TRANSFORM_CONVERSION_HPP
+#endif // CS_YAML_TO_TRANSFORM_CONVERSION_HPP
 

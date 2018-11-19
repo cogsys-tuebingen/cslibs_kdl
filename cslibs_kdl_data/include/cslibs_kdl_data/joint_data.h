@@ -1,5 +1,5 @@
-#ifndef JOINT_DATA_H
-#define JOINT_DATA_H
+#ifndef CS_JOINT_DATA_H
+#define CS_JOINT_DATA_H
 #include <vector>
 #include <string>
 #include <cslibs_kdl_data/header.h>

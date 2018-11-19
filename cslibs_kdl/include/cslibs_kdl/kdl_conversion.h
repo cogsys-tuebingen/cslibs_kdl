@@ -1,5 +1,5 @@
-#ifndef KDL_CONVERSION_H
-#define KDL_CONVERSION_H
+#ifndef CS_KDL_CONVERSION_H
+#define CS_KDL_CONVERSION_H
 
 #include <cslibs_kdl_data/suppress_warnings_start.h>
 #include <kdl/tree.hpp>
@@ -37,4 +37,4 @@ namespace cslibs_kdl {
 
 
 }
-#endif // KDL_CONVERSION_H
+#endif // CS_KDL_CONVERSION_H

@@ -255,7 +255,7 @@ int DynamicModel::getAcceleration(const std::vector<double>& q,
 
 int DynamicModel::getAcceleration(const std::vector<double> &q, const std::vector<double> &q_Dot,
                                        const std::vector<double> &q_DotDot, std::vector<std::string> &links,
-                                       std::vector<Eigen::Matrix<double, 6, 1>  >&spatial_acc)
+                                       std::vector<Eigen::Matrix<double, 6, 1>, Eigen::aligned_allocator<Eigen::Matrix<double, 6, 1> > > &spatial_acc)
 {
 
     std::vector<KDL::Twist> acc;
@@ -648,7 +648,7 @@ Eigen::MatrixXd DynamicModel::getRigidBodyRegressionMatrix(const std::string &ro
     std::vector<KDL::Twist> S(q.size());
     std::vector<KDL::Twist> v(q.size());
     std::vector<KDL::Twist> a(q.size());
-    std::vector<Eigen::Matrix<double, 6, 10> > An(q.size());
+    std::vector<Eigen::Matrix<double, 6, 10>, Eigen::aligned_allocator<Eigen::Matrix<double, 6, 10>> > An(q.size());
     KDL::Twist ag = -KDL::Twist(KDL::Vector(gx,gy,gz),KDL::Vector::Zero());
 
     for(unsigned int i = 0; i < q.size(); ++i) {
@@ -770,7 +770,7 @@ Eigen::MatrixXd DynamicModel::getStaticRigidBodyRegressionMatrix(const std::stri
     std::vector<KDL::Twist> S(q.size());
     std::vector<KDL::Twist> v(q.size());
     std::vector<KDL::Twist> a(q.size());
-    std::vector<Eigen::Matrix<double, 6, 4> > An(q.size());
+    std::vector<Eigen::Matrix<double, 6, 4>, Eigen::aligned_allocator<Eigen::Matrix<double, 6, 4>> > An(q.size());
     KDL::Twist ag = -KDL::Twist(KDL::Vector(gx,gy,gz),KDL::Vector::Zero());
 
     double qdot_ = 0;

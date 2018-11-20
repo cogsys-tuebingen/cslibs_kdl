@@ -98,7 +98,7 @@ public:
                         const std::vector<double>& q_Dot,
                         const std::vector<double>& q_DotDot,
                         std::vector<std::string>& links,
-                        std::vector<Eigen::Matrix<double, 6, 1> > &spatial_acc );
+                        std::vector<Eigen::Matrix<double, 6, 1>, Eigen::aligned_allocator<Eigen::Matrix<double, 6, 1>> > &spatial_acc );
     /**
      * @brief getAcceleration gets the accerlaration for all moving frames
      * @param q joint positions

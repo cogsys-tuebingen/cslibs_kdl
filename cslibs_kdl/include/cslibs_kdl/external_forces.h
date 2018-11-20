@@ -13,9 +13,10 @@ namespace cslibs_kdl {
  * It is expected that the 3 finger chain contain the string "finger" in the frame_ids.
  * For other chains this class could be generalized.
  */
-class ExternalForcesSerialChain
+class EIGEN_ALIGN16 ExternalForcesSerialChain
 {
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     using Ptr = std::shared_ptr<ExternalForcesSerialChain>;
     using ConstPtr = std::shared_ptr<const ExternalForcesSerialChain>;
 public:

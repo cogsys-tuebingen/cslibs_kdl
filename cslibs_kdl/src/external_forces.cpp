@@ -28,9 +28,13 @@ bool ExternalForcesSerialChain::initialize()
         for(auto link : link_names_){
             KDL::Vector rot_axis;
             model_.getRotationAxis(link, rot_axis);
-            Eigen::Matrix<double,1,6> si;
-            si << rot_axis(0),rot_axis(1),rot_axis(2),0,0,0;
-            sensor_mat_.block<1,6>(row,6*row) = si;
+//            Eigen::Matrix<double,1,6> si;
+//            si << rot_axis(0),rot_axis(1),rot_axis(2),0,0,0;
+//            sensor_mat_.block(row,6*row,1,6) = si;
+//            sensor_mat_.block(row, 6*row,1,6) << rot_axis(0),rot_axis(1),rot_axis(2),0,0,0;
+            sensor_mat_(row, 6*row)     = rot_axis(0);
+            sensor_mat_(row, 6*row + 1) = rot_axis(1);
+            sensor_mat_(row, 6*row + 2) = rot_axis(2);
             ++row;
         }
     }
@@ -65,10 +69,15 @@ void ExternalForcesSerialChain::getGeometricJacobianTransposed(const std::vector
                                     std::size_t n_joints,
                                     Eigen::MatrixXd& result ) const
 {
+    if(!init_sensor_mat_){
+        return;
+    }
     std::size_t max = n_joints;
     if(n_joints > n_joints_){
         max = n_joints_;
     }
+
+
     result.setZero(max, 6);
     std::string frame_end = link_names_[max -1];
     for(std::size_t row = 0; row < max; ++row){
@@ -80,8 +89,8 @@ void ExternalForcesSerialChain::getGeometricJacobianTransposed(const std::vector
         model_.getFKPose(pos, T0j, frame_end);
         KDL::Frame Tij = T0i.Inverse() * T0j;
         Eigen::Matrix<double, 6, 6> T = cslibs_kdl::convert2EigenWrenchTransform(Tij);
-        Eigen::Matrix<double,1,6> si = sensor_mat_.block(row,6*row,1,6);
-        Eigen::Matrix<double,1,6>  column = si * T;
+//        Eigen::Matrix<double,1,6> si = sensor_mat_.block(row,6*row,1,6).eval();
+        Eigen::Matrix<double,1,6>  column = sensor_mat_.block(row,6*row,1,6).eval() * T;
         result.block(row,0,1,6) =  column;
     }
 }

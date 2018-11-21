@@ -81,6 +81,8 @@ public:
     inline Eigen::MatrixXd getJointAxisProjection() const {return sensor_mat_;}
     inline std::string getFrameId(std::size_t id) const {return link_names_.at(id);}
 
+    static KDL::Wrench createWrench(const KDL::Vector& position, const KDL::Vector& direction_vector, const KDL::Vector& force = KDL::Vector(-1,0,0));
+
 protected:
     bool set_model_;
     bool init_sensor_mat_;

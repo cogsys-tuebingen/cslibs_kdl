@@ -303,3 +303,13 @@ KDL::Frame ExternalForcesSerialChain::getFKPose(const cslibs_kdl_data::JointStat
     return getFKPose(state.position, link);
 }
 
+KDL::Wrench ExternalForcesSerialChain::createWrench(const KDL::Vector& position, const KDL::Vector& direction_vector, const KDL::Vector& force)
+{
+    KDL::Vector x(1,0,0);
+    KDL::Vector axis = x * direction_vector;
+    KDL::Wrench w(force, KDL::Vector::Zero());
+    double alpha = std::acos(dot(x, direction_vector));
+    KDL::Frame T(KDL::Rotation::Rot(axis, alpha), position);
+    w = T * w;
+    return w;
+}

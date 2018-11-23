@@ -34,6 +34,10 @@ public:
                                         std::size_t up_to_joint,
                                         Eigen::MatrixXd& result ) const;
 
+    void getGeometricJacobianTransposed(const std::vector<double>& pos,
+                                        std::string segment,
+                                        Eigen::MatrixXd& result ) const;
+
     void getGeometricJacobianTransposed(const cslibs_kdl_data::JointStateData& state,
                                         std::size_t up_to_joint,
                                         Eigen::MatrixXd& result ) const;
@@ -58,6 +62,7 @@ public:
                             std::size_t up_to_joint,
                             Eigen::MatrixXd& result ) const;
     KDL::Frame getFKPose(const std::vector<double> &pos, const std::string& link) const;
+    KDL::Frame getFKPose(const std::vector<double> &pos, const std::string& parent, const std::string& link) const;
     KDL::Frame getFKPose(const cslibs_kdl_data::JointStateData &state, const std::string& link) const;
 
     Eigen::VectorXd getExternalTorques(const std::vector<double>& pos,

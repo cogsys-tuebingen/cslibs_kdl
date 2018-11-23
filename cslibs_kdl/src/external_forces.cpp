@@ -95,6 +95,21 @@ void ExternalForcesSerialChain::getGeometricJacobianTransposed(const std::vector
     }
 }
 
+void ExternalForcesSerialChain::getGeometricJacobianTransposed(const std::vector<double> &pos, std::string segment, Eigen::MatrixXd &result) const
+{
+
+    std::string frame = segment;
+    if(segment.find("finger") != std::string::npos ){
+        frame = chain_tip_;
+    }
+    int index = model_.getKDLSegmentIndex(frame);
+    if(index < 0){
+        throw std::runtime_error("Cannot find link id for " + segment);
+    }
+
+    getGeometricJacobianTransposed(pos,index +1, result);
+}
+
 void ExternalForcesSerialChain::getGeometricJacobianTransposed(const cslibs_kdl_data::JointStateData &state, std::size_t n_joints, Eigen::MatrixXd &result) const
 {
     getGeometricJacobianTransposed(state.position, n_joints, result);
@@ -265,6 +280,7 @@ KDL::Frame ExternalForcesSerialChain::getFKPose(const std::vector<double>& posit
         }
         return q;
     };
+
     if(link.find("finger") == std::string::npos){
         ec = model_.getFKPose(position, res, link);
     }
@@ -296,6 +312,15 @@ KDL::Frame ExternalForcesSerialChain::getFKPose(const std::vector<double>& posit
         throw std::runtime_error("can not compute forwad kinematics.");
     }
     return res;
+}
+
+KDL::Frame ExternalForcesSerialChain::getFKPose(const std::vector<double> &pos, const std::string& parent, const std::string& link) const
+{
+    // FK returns pose in base frame coordinates!
+    KDL::Frame b_T_p = getFKPose(pos, parent);
+    KDL::Frame b_T_l = getFKPose(pos, link);
+    KDL::Frame p_T_l = b_T_p.Inverse() * b_T_l;
+    return p_T_l;
 }
 
 KDL::Frame ExternalForcesSerialChain::getFKPose(const cslibs_kdl_data::JointStateData &state, const std::string& link) const

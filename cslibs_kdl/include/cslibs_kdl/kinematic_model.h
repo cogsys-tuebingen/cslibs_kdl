@@ -56,6 +56,10 @@ public:
      */
     int getFKPose(const std::vector<double>& q_in, KDL::Frame& out, const std::string link) const;
 
+
+    int getFKPose(const std::vector<double>& q_in, KDL::Frame& out, const std::string parent, const std::string link) const;
+
+
     /**
      * @brief getIKSolution given a end effector pose a corresponding joint configuration is search. trac_ik wrapper
      * @param pose      input: the pose (position, orientation) of the end-effector

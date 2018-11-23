@@ -110,7 +110,7 @@ bool KinematicModel::initialize()
     }
     else{
         ROS_WARN_STREAM("Chain extraction is not possible. Solver is not probably initalized. robot_model: " << robot_model_.name_
-                                         << "; Root link: "<< root_ << "; tip: " << tip_);
+                        << "; Root link: "<< root_ << "; tip: " << tip_);
         return false;
     }
     return true;
@@ -139,6 +139,38 @@ int KinematicModel::getFKPose(const std::vector<double> &q_in, KDL::Frame &out, 
 
     if(segId > -2){
         int error_code = solverFk_->JntToCart(q, out, segId);
+        return error_code;
+    }
+    else{
+        ROS_ERROR_STREAM("Link " << link << " is not part of KDL chain.");
+        return KDL::SolverI::E_UNDEFINED;
+    }
+}
+
+int KinematicModel::getFKPose(const std::vector<double>& q_in, KDL::Frame& out, const std::string parent, const std::string link) const
+{
+    if(q_in.size() < chain_.getNrOfJoints()){
+        //        std::string error = std::to_string(chain_.getNrOfJoints()) + " joint values expected got only " + std::to_string(q_in.size()) + "!";
+        //        throw std::runtime_error(error);
+        ROS_ERROR_STREAM(chain_.getNrOfJoints() << " joint values expected got only " << q_in.size() << "!");
+        return KDL::SolverI::E_UNDEFINED;
+    }
+
+    KDL::JntArray q;
+    convert(q_in, q, q_in.size() - chain_.getNrOfJoints());
+
+    int segId = getKDLSegmentIndexFK(parent);
+
+    if(segId > -2){
+        KDL::Frame b_T_p;
+        int error_code = solverFk_->JntToCart(q, b_T_p, segId);
+        segId = getKDLSegmentIndexFK(link);
+        if(segId <= -2){
+            return KDL::SolverI::E_UNDEFINED;
+        }
+        KDL::Frame b_T_l;
+        error_code = solverFk_->JntToCart(q, b_T_l, segId);
+        out = b_T_p.Inverse() * b_T_l;
         return error_code;
     }
     else{

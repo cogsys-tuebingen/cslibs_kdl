@@ -327,6 +327,23 @@ KDL::Frame ExternalForcesSerialChain::getFKPose(const cslibs_kdl_data::JointStat
 {
     return getFKPose(state.position, link);
 }
+std::vector<std::string> ExternalForcesSerialChain::getAllLinkNames() const
+{
+    std::vector<std::string> res = model_.getLinkNames();
+    std::vector<std::string> f1 = model_f1_.getLinkNames();
+    std::vector<std::string> f2 = model_f2_.getLinkNames();
+    std::vector<std::string> f3 = model_f3_.getLinkNames();
+    for(auto s : f1){
+        res.emplace_back(s);
+    }
+    for(auto s : f2){
+        res.emplace_back(s);
+    }
+    for(auto s : f3){
+        res.emplace_back(s);
+    }
+    return res;
+}
 
 KDL::Wrench ExternalForcesSerialChain::createWrench(const KDL::Vector& position, const KDL::Vector& direction_vector, const KDL::Vector& force)
 {
@@ -334,6 +351,20 @@ KDL::Wrench ExternalForcesSerialChain::createWrench(const KDL::Vector& position,
     KDL::Vector axis = x * direction_vector;
     KDL::Wrench w(force, KDL::Vector::Zero());
     double alpha = std::acos(dot(x, direction_vector));
+    KDL::Frame T(KDL::Rotation::Rot(axis, alpha), position);
+    w = T * w;
+    return w;
+}
+
+KDL::Wrench ExternalForcesSerialChain::createWrench(const KDL::Vector& position, const KDL::Vector& direction_vector, const double theta, const double phi)
+{
+    KDL::Vector z(0,0,1);
+    KDL::Vector axis = z * direction_vector;
+    KDL::Vector force(std::sin(theta)*std::cos(phi),
+                      std::sin(theta)*std::sin(phi),
+                      std::cos(theta));
+    KDL::Wrench w(-force, KDL::Vector::Zero());
+    double alpha = std::acos(dot(z, direction_vector));
     KDL::Frame T(KDL::Rotation::Rot(axis, alpha), position);
     w = T * w;
     return w;

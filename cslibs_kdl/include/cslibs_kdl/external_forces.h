@@ -81,11 +81,14 @@ public:
     Eigen::MatrixXd getJacobian(const cslibs_kdl_data::JointStateData &state , int id =-1);
     bool getJacobian(const cslibs_kdl_data::JointStateData& state, const std::string& frame, Eigen::MatrixXd &jacobian);
 
+    std::vector<std::string> getAllLinkNames() const;
+
     inline std::size_t getNrJoints() const {return n_joints_;}
     inline Eigen::MatrixXd getJointAxisProjection() const {return sensor_mat_;}
     inline std::string getFrameId(std::size_t id) const {return link_names_.at(id);}
 
     static KDL::Wrench createWrench(const KDL::Vector& position, const KDL::Vector& direction_vector, const KDL::Vector& force = KDL::Vector(-1,0,0));
+    static KDL::Wrench createWrench(const KDL::Vector &position, const KDL::Vector &direction_vector, const double theta, const double phi);
 
 protected:
     bool set_model_;

@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<package>
+  <name>cslibs_kdl_msgs</name>
+  <version>0.0.0</version>
+  <description>The cslibs_kdl_msgs package</description>
+
+ <maintainer email="adrian.zwiener@uni-tuebingen.de">Adrian Zwiener</maintainer>
+
+  <license>BSD</license>
+
+  <author email="adrian.zwiener@uni-tuebingen.de">Adrian Zwiener</author>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>std_srvs</build_depend>
+  <build_depend>std_msgs</build_depend>
+
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>message_generation</run_depend>
+  <run_depend>message_runtime</run_depend>
+  <run_depend>std_srvs</run_depend>
+  <run_depend>std_msgs</run_depend>
+
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>

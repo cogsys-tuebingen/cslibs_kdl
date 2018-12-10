@@ -27,6 +27,13 @@ public:
     double& operator ()(std::size_t i);
     const double& operator ()(std::size_t i) const;
 
+    double& x();
+    const double& x() const;
+    double& y();
+    const double& y() const;
+    double& z();
+    const double& z() const;
+
     ///
     /// \brief operator * element wise multiplication
     /// \param other the other vector

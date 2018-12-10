@@ -180,6 +180,35 @@ void Vector3::normalize()
     v /= n;
   }
 }
+double& Vector3::x()
+{
+    return vector[0];
+}
+
+const double& Vector3::x() const
+{
+    return vector[0];
+}
+
+double& Vector3::y()
+{
+    return vector[1];
+}
+
+const double& Vector3::y() const
+{
+    return vector[1];
+}
+
+double& Vector3::z()
+{
+    return vector[2];
+}
+
+const double& Vector3::z() const
+{
+    return vector[2];
+}
 
 std::vector<double> Vector3::toVector() const
 {

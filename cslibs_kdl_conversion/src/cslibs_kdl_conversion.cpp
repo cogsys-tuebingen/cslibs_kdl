@@ -28,10 +28,23 @@ void Vector3Conversion::ros2data(const geometry_msgs::Vector3& in, cslibs_kdl_da
     out(2) = in.z;
 }
 
+void Vector3Conversion::data2ros(const cslibs_kdl_data::Vector3 &in, geometry_msgs::Vector3 &out)
+{
+    out.x = in.x();
+    out.y = in.y();
+    out.z = in.z();
+}
+
 void Vector3StampedConversion::ros2data(const geometry_msgs::Vector3Stamped &in, cslibs_kdl_data::Vector3Stamped& out)
 {
     HeaderConversion::ros2data(in.header, out.header);
     Vector3Conversion::ros2data(in.vector, out);
+}
+
+void Vector3StampedConversion::data2ros(const cslibs_kdl_data::Vector3Stamped &in, geometry_msgs::Vector3Stamped &out)
+{
+    HeaderConversion::data2ros(in.header, out.header);
+    Vector3Conversion::data2ros(in, out.vector);
 }
 
 void JointStateConversion::ros2data(const sensor_msgs::JointState &in, cslibs_kdl_data::JointStateData &out)
@@ -61,3 +74,22 @@ void JointStateStampedConversion::data2ros(const cslibs_kdl_data::JointStateData
     HeaderConversion::data2ros(in.header, out.header);
     JointStateConversion::data2ros(in.data, out);
 }
+
+void ContactPointConversion::ros2data(const cslibs_kdl_msgs::ContactMessage &in, cslibs_kdl_data::ContactPoint &out)
+{
+    HeaderConversion::ros2data(in.header, out.header);
+    Vector3Conversion::ros2data(in.direction , out.direction);
+    Vector3Conversion::ros2data(in.location, out.position);
+    out.force = in.force;
+
+}
+
+void ContactPointConversion::data2ros(const cslibs_kdl_data::ContactPoint &in, cslibs_kdl_msgs::ContactMessage &out)
+{
+    HeaderConversion::data2ros(in.header, out.header);
+    Vector3Conversion::data2ros(in.direction , out.direction);
+    Vector3Conversion::data2ros(in.position, out.direction);
+    out.force = in.force;
+}
+
+

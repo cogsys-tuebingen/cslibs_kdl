@@ -3,7 +3,9 @@
 
 #include <cslibs_kdl/dynamic_model.h>
 #include <cslibs_kdl_data/joint_state_data.h>
+#include <cslibs_kdl_data/contact_point.hpp>
 #include <eigen3/Eigen/Dense>
+
 
 namespace cslibs_kdl {
 /**
@@ -89,6 +91,14 @@ public:
 
     static KDL::Wrench createWrench(const KDL::Vector& position, const KDL::Vector& direction_vector, const KDL::Vector& force = KDL::Vector(-1,0,0));
     static KDL::Wrench createWrench(const KDL::Vector &position, const KDL::Vector &direction_vector, const double theta, const double phi);
+
+    /**
+     * @brief forceRegression calculates the force for multiple contacts if position and direction are provided
+     * @param state joint state whith external torque residual as torque field
+     * @param contacts vector of active contacts, force attribute is set by this method
+     */
+    void forceRegression(const cslibs_kdl_data::JointStateData& state,
+                         std::vector<cslibs_kdl_data::ContactPoint>& contacts) const;
 
 protected:
     bool set_model_;

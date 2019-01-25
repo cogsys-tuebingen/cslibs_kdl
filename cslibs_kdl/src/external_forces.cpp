@@ -4,6 +4,7 @@
 using namespace cslibs_kdl;
 
 ExternalForcesSerialChain::ExternalForcesSerialChain() :
+    use_fingers_(false),
     set_model_(false),
     init_sensor_mat_(false),
     n_joints_(0),
@@ -56,10 +57,21 @@ void ExternalForcesSerialChain::setModel(const std::string &robot_model,
     finger_1_tip_ = finger_1_tip;
     finger_2_tip_ = finger_2_tip;
     finger_3_tip_ = finger_3_tip;
+
     model_= cslibs_kdl::KinematicModel(robot_model, chain_root, chain_tip);
-    model_f1_= cslibs_kdl::KinematicModel(robot_model, chain_tip, finger_1_tip);
-    model_f2_= cslibs_kdl::KinematicModel(robot_model, chain_tip, finger_2_tip);
-    model_f3_= cslibs_kdl::KinematicModel(robot_model, chain_tip, finger_3_tip);
+    if(finger_1_tip_ != ""){
+      model_f1_= cslibs_kdl::KinematicModel(robot_model, chain_tip, finger_1_tip);
+      use_fingers_ = true;
+    }
+    if(finger_2_tip_ != ""){
+      model_f2_= cslibs_kdl::KinematicModel(robot_model, chain_tip, finger_2_tip);
+      use_fingers_ = true;
+    }
+    if(finger_3_tip_ != ""){
+      model_f3_= cslibs_kdl::KinematicModel(robot_model, chain_tip, finger_3_tip);
+      use_fingers_ = true;
+    }
+
     link_names_ = model_.getLinkNames();
     n_joints_ = model_.getNrOfJoints();
     set_model_ = true;
@@ -99,7 +111,7 @@ void ExternalForcesSerialChain::getGeometricJacobianTransposed(const std::vector
 {
 
     std::string frame = segment;
-    if(segment.find("finger") != std::string::npos ){
+    if(use_fingers_ && segment.find("finger") != std::string::npos ){
         frame = chain_tip_;
     }
     int index = model_.getKDLSegmentIndex(frame);
@@ -195,7 +207,7 @@ Eigen::VectorXd ExternalForcesSerialChain::getExternalTorques(const std::vector<
     KDL::Wrench wt = w;
 
     std::string frame = frame_id;
-    if(frame_id.find("finger") != std::string::npos ){
+    if(use_fingers_ && frame_id.find("finger") != std::string::npos ){
         frame = chain_tip_;
         KDL::Frame hTf = getFKPose(pos, chain_tip_);
         wt = hTf * wt;
@@ -232,7 +244,7 @@ Eigen::VectorXd ExternalForcesSerialChain::getExternalTorquesKDL(const std::vect
     std::string frame = frame_id;
     KDL::Wrench wchain = w_local;
     // if local frame is a finger frame project wrench to finger frame
-    if(frame_id.find("finger") != std::string::npos ){
+    if( use_fingers_ && frame_id.find("finger") != std::string::npos ){
         frame = chain_tip_;
         KDL::Frame hTf = getFKPose(pos, chain_tip_);
         wchain = hTf * wchain;

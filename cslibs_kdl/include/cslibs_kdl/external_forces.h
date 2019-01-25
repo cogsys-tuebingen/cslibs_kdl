@@ -101,6 +101,7 @@ public:
                          std::vector<cslibs_kdl_data::ContactPoint>& contacts) const;
 
 protected:
+    bool use_fingers_;
     bool set_model_;
     bool init_sensor_mat_;
     KinematicModel model_;

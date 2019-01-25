@@ -386,7 +386,7 @@ void ExternalForcesSerialChain::forceRegression(const cslibs_kdl_data::JointStat
 {
     std::size_t n_c = contacts.size();
     std::size_t offset = state.torque.size() - n_joints_;
-    Eigen::MatrixXd reg_mat = Eigen::MatrixXd(n_joints_, n_c);
+    Eigen::MatrixXd reg_mat = Eigen::MatrixXd::Zero(n_joints_, n_c);
     if(state.torque.size() < n_joints_){
         throw std::runtime_error("Dimension missmatch! Expected " + std::to_string(n_joints_) + " torques");
     }
@@ -398,14 +398,14 @@ void ExternalForcesSerialChain::forceRegression(const cslibs_kdl_data::JointStat
         KDL::Vector dir(p.direction(0), p.direction(1), p.direction(2));
         KDL::Wrench wi = createWrench(pos, dir);
         Eigen::VectorXd tau_i = getExternalTorques(state.position, p.header.frame_id, wi);
-        reg_mat.block(i,0, n_joints_, 1) = tau_i;
+        reg_mat.block(0, i, tau_i.rows(), 1) = tau_i.eval();
     }
 
      Eigen::JacobiSVD<Eigen::MatrixXd> svd(reg_mat, Eigen::ComputeThinU | Eigen::ComputeThinV | Eigen::FullPivHouseholderQRPreconditioner);
      Eigen::VectorXd forces = svd.solve(r);
-
+     //createWrench supposes the force is antiparallel to the normal!
      for(std::size_t i = 0; i < n_c; ++i){
          cslibs_kdl_data::ContactPoint& p = contacts[i];
-         p.force = forces(i);
+         p.force = -forces(i);
      }
 }

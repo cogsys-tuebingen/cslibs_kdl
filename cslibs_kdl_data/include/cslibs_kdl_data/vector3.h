@@ -53,6 +53,13 @@ public:
     std::string to_string(const std::string delimiter = std::string(";")) const;
     Eigen::Vector3d toEigen() const;
     void fromEigen(const Eigen::Vector3d& v);
+    ///
+    /// \brief dot multipication/ scalar product
+    /// \param other the other vector
+    /// \return dot product
+    ///
+    double dot(const Vector3& other) const;
+    double angleBetween(const Vector3& other) const;
 
 public:
     std::array<double,3> vector;

@@ -6,6 +6,7 @@
 #include <cslibs_kdl_data/contact_point.hpp>
 #include <cslibs_kdl_msgs/ContactMessage.h>
 #include <geometry_msgs/Vector3Stamped.h>
+#include <geometry_msgs/Point.h>
 #include <sensor_msgs/JointState.h>
 #include <kdl/frames.hpp>
 namespace cslibs_kdl {
@@ -21,6 +22,8 @@ namespace cslibs_kdl {
     {
         static void ros2data(const geometry_msgs::Vector3& in, cslibs_kdl_data::Vector3& out);
         static void data2ros(const cslibs_kdl_data::Vector3& in, geometry_msgs::Vector3& out);
+        static void ros2data(const geometry_msgs::Point& in, cslibs_kdl_data::Vector3& out);
+        static void data2ros(const cslibs_kdl_data::Vector3& in, geometry_msgs::Point& out);
     };
     struct Vector3StampedConversion
     {

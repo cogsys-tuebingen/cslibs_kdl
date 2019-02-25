@@ -316,7 +316,7 @@ KDL::Frame ExternalForcesSerialChain::getFKPose(const std::vector<double>& posit
         KDL::Frame hand;
         KDL::Frame f3;
         ec = model_.getFKPose(position, hand, model_.getTipLink());
-        std::vector<double> q = getQvec(position, n_joints_, 3);
+        std::vector<double> q = getQvec(position, n_joints_, 2);
         ec *= model_f3_.getFKPose(q, f3, link);
         res = hand * f3;
     }

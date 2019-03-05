@@ -1,0 +1,22 @@
+<launch>
+<arg name="in_topic" default="/joint_state"/>
+<arg name="out_topic" default="/estimated_ext_torque"/>
+<arg name="chain_root" default="jaco_link_base"/>
+<arg name="chain_tip" default="jaco_link_hand"/>
+
+<node type="external_torque_observer"
+      name="external_torque_observer"
+      pkg="cslibs_kdl"
+      output="screen">
+        <param name="in_topic"          value="$(arg in_topic)"/>
+        <param name="out_topic"         value="$(arg out_topic)"/>
+        <param name="robot_description" value="/robot_description"/>
+        <param name="chain_root"        value="$(arg chain_root)"/>
+        <param name="chain_tip"         value="$(arg chain_tip)"/>
+        <param name="gravity_x"         value="0"/>
+        <param name="gravity_y"         value="0"/>
+        <param name="gravity_z"         value="-9.81"/>
+        <param name="frequncy"          value="60"/>
+        <param name="gain"              value="10"/>
+      </node>
+</launch>

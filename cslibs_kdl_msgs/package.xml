@@ -4,7 +4,7 @@
   <version>0.0.0</version>
   <description>The cslibs_kdl_msgs package</description>
 
-  <maintainer email="adrian.zwiener@uni-tuebingen.de">Adrian Zwiener</maintainer>
+  git remote add origin https://github.com/cogsys-tuebingen/cslibs_mesh_map.git<maintainer email="adrian.zwiener@uni-tuebingen.de">Adrian Zwiener</maintainer>
   <author email="adrian.zwiener@uni-tuebingen.de">Adrian Zwiener</author>
 
   <license>BSD</license>

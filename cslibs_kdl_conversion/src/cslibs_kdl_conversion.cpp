@@ -35,6 +35,20 @@ void Vector3Conversion::data2ros(const cslibs_kdl_data::Vector3 &in, geometry_ms
     out.z = in.z();
 }
 
+void Vector3Conversion::ros2data(const geometry_msgs::Point& in, cslibs_kdl_data::Vector3& out)
+{
+    out(0) = in.x;
+    out(1) = in.y;
+    out(2) = in.z;
+}
+
+void Vector3Conversion::data2ros(const cslibs_kdl_data::Vector3 &in, geometry_msgs::Point &out)
+{
+    out.x = in.x();
+    out.y = in.y();
+    out.z = in.z();
+}
+
 void Vector3StampedConversion::ros2data(const geometry_msgs::Vector3Stamped &in, cslibs_kdl_data::Vector3Stamped& out)
 {
     HeaderConversion::ros2data(in.header, out.header);

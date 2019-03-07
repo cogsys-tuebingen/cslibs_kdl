@@ -25,32 +25,32 @@ KinematicModel::KinematicModel(const std::string &robot_model, const std::string
     urdf_param_(robot_model), root_(chain_root), tip_(chain_tip), gravity_(0,0,-9.81)
 {
 
-    if(boost::filesystem::exists(robot_model)){
-        ROS_DEBUG_NAMED("KinematicModel","Load robot model from file.");
-        if(!robot_model_.initFile(robot_model)){
-            ROS_ERROR("Failed to pars urdf file");
-        }
+    //    if(boost::filesystem::exists(robot_model)){
+    //        ROS_DEBUG_NAMED("KinematicModel","Load robot model from file.");
+    //        if(!robot_model_.initFile(robot_model)){
+    //            ROS_ERROR("Failed to pars urdf file");
+    //        }
+    //    }
+    //    else{
+
+    ros::NodeHandle node_handle("~");
+
+    std::string xml_string;
+
+    std::string urdf_xml,full_urdf_xml;
+    node_handle.param("urdf_xml",urdf_xml,urdf_param_);
+    node_handle.searchParam(urdf_xml,full_urdf_xml);
+
+    ROS_DEBUG_NAMED("KinematicModel","Reading xml file from parameter server");
+    if (!node_handle.getParam(full_urdf_xml, xml_string))
+    {
+        ROS_FATAL_NAMED("KinematicModel","Could not load the xml from parameter server: %s", urdf_xml.c_str());
+        return;
     }
-    else{
 
-        ros::NodeHandle node_handle("~");
-
-        std::string xml_string;
-
-        std::string urdf_xml,full_urdf_xml;
-        node_handle.param("urdf_xml",urdf_xml,urdf_param_);
-        node_handle.searchParam(urdf_xml,full_urdf_xml);
-
-        ROS_DEBUG_NAMED("KinematicModel","Reading xml file from parameter server");
-        if (!node_handle.getParam(full_urdf_xml, xml_string))
-        {
-            ROS_FATAL_NAMED("KinematicModel","Could not load the xml from parameter server: %s", urdf_xml.c_str());
-            return;
-        }
-
-        node_handle.param(full_urdf_xml,xml_string,std::string());
-        robot_model_.initString(xml_string);
-    }
+    node_handle.param(full_urdf_xml,xml_string,std::string());
+    robot_model_.initString(xml_string);
+    //    }
     bool init = initialize();
     if(!init){
         throw std::runtime_error("Could not initialize FK");
@@ -73,12 +73,12 @@ bool KinematicModel::setTreeParam(const std::string &robot_model)
     return initialize();
 }
 
-bool KinematicModel::setTreeFile(const std::string &robot_model)
-{
-    robot_model_.initFile(robot_model);
-    urdf_param_ = robot_model_.getName();
-    return initialize();
-}
+//bool KinematicModel::setTreeFile(const std::string &robot_model)
+//{
+//    robot_model_.initFile(robot_model);
+//    urdf_param_ = robot_model_.getName();
+//    return initialize();
+//}
 
 
 
@@ -91,20 +91,25 @@ bool KinematicModel::initialize()
     if(tree_.getChain(root_,tip_,chain_)){
         chainFile_ = chain_;
         // forward kinematic
-        solverFk_.reset(new KDL::ChainFkSolverPos_recursive(chain_));
+        solver_fk_.reset(new KDL::ChainFkSolverPos_recursive(chain_));
 
         // jacobian solver (calculates jacobian for given joint configuration)
-        solverJac_.reset(new KDL::ChainJntToJacSolver(chain_));
+        solver_jac_.reset(new KDL::ChainJntToJacSolver(chain_));
         // inverse vel solver
-        solverIKVel_.reset(new KDL::ChainIkSolverVel_pinv(chain_));
+        solver_ik_vel_.reset(new KDL::ChainIkSolverVel_pinv(chain_));
 
         //initialize TRAC_IK solver: inverse kinematics
-        solverIK_.reset(new TRAC_IK::TRAC_IK(root_, tip_, urdf_param_));
+        solver_ik_.reset(new TRAC_IK::TRAC_IK(root_, tip_, urdf_param_));
 
-        solverIK_->getKDLLimits(lowerLimits_, upperLimits_);
-        jointDist_.resize(chain_.getNrOfJoints());
+        solver_ik_->getKDLLimits(lower_limits_, upper_limits_);
+        joint_dist_.resize(chain_.getNrOfJoints());
+        if(lower_limits_.rows() < chain_.getNrOfJoints() || upper_limits_.rows() < chain_.getNrOfJoints()){
+            throw std::runtime_error("Empty joint limits! Trac IK not properly initialized! #(joints): " +
+                                     std::to_string(chain_.getNrOfJoints()) + " #(limits): " +
+                                     std::to_string(std::min(lower_limits_.rows(), upper_limits_.rows())));
+        }
         for(std::size_t i = 0; i < chain_.getNrOfJoints(); ++i){
-            jointDist_[i] = std::uniform_real_distribution<double>(lowerLimits_(i),upperLimits_(i));
+            joint_dist_[i] = std::uniform_real_distribution<double>(lower_limits_(i), upper_limits_(i));
         }
 
     }
@@ -138,7 +143,7 @@ int KinematicModel::getFKPose(const std::vector<double> &q_in, KDL::Frame &out, 
     int segId = getKDLSegmentIndexFK(link);
 
     if(segId > -2){
-        int error_code = solverFk_->JntToCart(q, out, segId);
+        int error_code = solver_fk_->JntToCart(q, out, segId);
         return error_code;
     }
     else{
@@ -163,13 +168,13 @@ int KinematicModel::getFKPose(const std::vector<double>& q_in, KDL::Frame& out, 
 
     if(segId > -2){
         KDL::Frame b_T_p;
-        int error_code = solverFk_->JntToCart(q, b_T_p, segId);
+        int error_code = solver_fk_->JntToCart(q, b_T_p, segId);
         segId = getKDLSegmentIndexFK(link);
         if(segId <= -2){
             return KDL::SolverI::E_UNDEFINED;
         }
         KDL::Frame b_T_l;
-        error_code = solverFk_->JntToCart(q, b_T_l, segId);
+        error_code = solver_fk_->JntToCart(q, b_T_l, segId);
         out = b_T_p.Inverse() * b_T_l;
         return error_code;
     }
@@ -199,10 +204,10 @@ int KinematicModel::getIKSolution(const tf::Pose& pose, std::vector<double>& res
     KDL::Frame frame;
     if(seed.size() == 0){
         KDL::JntArray ub, lb;
-        solverIK_->getKDLLimits(lb, ub);
+        solver_ik_->getKDLLimits(lb, ub);
         q.resize(chain_.getNrOfJoints());
         for(std::size_t i = 0; i < chain_.getNrOfJoints(); ++i){
-            q(i) = jointDist_[i](randEng_);
+            q(i) = joint_dist_[i](rand_eng_);
 
         }
     } else{
@@ -210,7 +215,7 @@ int KinematicModel::getIKSolution(const tf::Pose& pose, std::vector<double>& res
     }
     //convert tf pose to kdl frame
     cslibs_kdl::poseTFToKDL(pose,frame);
-    int error_code = solverIK_->CartToJnt(q,frame,solution);
+    int error_code = solver_ik_->CartToJnt(q,frame,solution);
     convert(solution,result);
     return error_code;
 }
@@ -243,10 +248,10 @@ void KinematicModel::changeKineticParams(const std::string &link, const Eigen::V
             chain_ = newChain;
 
             // forward kinematic
-            solverFk_.reset(new KDL::ChainFkSolverPos_recursive(chain_));
+            solver_fk_.reset(new KDL::ChainFkSolverPos_recursive(chain_));
 
             //initialize TRAC_IK solver: inverse kinematics
-            solverIK_.reset(new TRAC_IK::TRAC_IK(chain_, lowerLimits_, upperLimits_));
+            solver_ik_.reset(new TRAC_IK::TRAC_IK(chain_, lower_limits_, upper_limits_));
         }
     }
 }
@@ -256,10 +261,10 @@ void KinematicModel::useUrdfDynamicParams()
     chain_ = chainFile_;
 
     // forward kinematic
-    solverFk_.reset(new KDL::ChainFkSolverPos_recursive(chain_));
+    solver_fk_.reset(new KDL::ChainFkSolverPos_recursive(chain_));
 
     //initialize TRAC_IK solver: inverse kinematics
-    solverIK_.reset(new TRAC_IK::TRAC_IK(chain_, lowerLimits_, upperLimits_));
+    solver_ik_.reset(new TRAC_IK::TRAC_IK(chain_, lower_limits_, upper_limits_));
 }
 
 int KinematicModel::getKDLSegmentIndexFK(const std::string &name) const
@@ -303,10 +308,10 @@ int KinematicModel::getKDLSegmentIndex(const std::string &name) const
 void KinematicModel::getRandomConfig(std::vector<double>& config)
 {
     KDL::JntArray ub, lb;
-    solverIK_->getKDLLimits(lb, ub);
+    solver_ik_->getKDLLimits(lb, ub);
     config.resize(chain_.getNrOfJoints());
     for(std::size_t i = 0; i < config.size(); ++i){
-        config[i] = jointDist_[i](randEng_);
+        config[i] = joint_dist_[i](rand_eng_);
     }
 }
 
@@ -366,8 +371,8 @@ std::vector<std::string> KinematicModel::getLinkNames() const
 
 double  KinematicModel::getUpperJointLimit(const std::size_t id) const
 {
-    if(upperLimits_.rows() > id){
-        return upperLimits_(id);
+    if(upper_limits_.rows() > id){
+        return upper_limits_(id);
     }
     else{
         return 0;
@@ -376,8 +381,8 @@ double  KinematicModel::getUpperJointLimit(const std::size_t id) const
 
 double  KinematicModel::getLowerJointLimit(const std::size_t id) const
 {
-    if(lowerLimits_.rows() > id){
-        return lowerLimits_(id);
+    if(lower_limits_.rows() > id){
+        return lower_limits_(id);
     }
     else{
         return 0;
@@ -430,7 +435,7 @@ KDL::Jacobian KinematicModel::getJacobian(const std::vector<double> &q, int seg_
     KDL::JntArray qvals;
     convert(q, qvals, q.size() - nj);
 
-    solverJac_->JntToJac(qvals, jac, seg_id);
+    solver_jac_->JntToJac(qvals, jac, seg_id);
     return jac;
 }
 
@@ -445,7 +450,7 @@ int KinematicModel::getJointVelocities(const std::vector<double> &q, const KDL::
 
     KDL::JntArray out;
     out.resize(nj);
-    int ec = solverIKVel_->CartToJnt(qvals,v_in, out);
+    int ec = solver_ik_vel_->CartToJnt(qvals,v_in, out);
     convert(out, v_out);
 
     return ec;

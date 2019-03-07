@@ -39,7 +39,7 @@ public:
 
 
     bool setTreeParam(const std::string& robot_model) override;
-    bool setTreeFile(const std::string &robot_model) override;
+//    bool setTreeFile(const std::string &robot_model) override;
     /**
      * @brief setGravity set gravity
      * @param x x component (default 0)

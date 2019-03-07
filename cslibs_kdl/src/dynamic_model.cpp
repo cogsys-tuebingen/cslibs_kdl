@@ -30,12 +30,12 @@ bool DynamicModel::setTreeParam(const std::string &robot_model)
     return initialize();
 }
 
-bool DynamicModel::setTreeFile(const std::string &robot_model)
-{
-    robot_model_.initFile(robot_model);
-    urdf_param_ = robot_model;
-    return initialize();
-}
+//bool DynamicModel::setTreeFile(const std::string &robot_model)
+//{
+//    robot_model_.initFile(robot_model);
+//    urdf_param_ = robot_model;
+//    return initialize();
+//}
 
 
 bool DynamicModel::initialize()
@@ -446,10 +446,10 @@ void DynamicModel::changeKineticParams(const std::string &link, const Eigen::Vec
             solverID_.reset(new KDL::ChainIdSolver_RNE(chain_,gravity_));
 
             // forward kinematic
-            solverFk_.reset(new KDL::ChainFkSolverPos_recursive(chain_));
+            solver_fk_.reset(new KDL::ChainFkSolverPos_recursive(chain_));
 
             //initialize TRAC_IK solver: inverse kinematics
-            solverIK_.reset(new TRAC_IK::TRAC_IK(chain_, lowerLimits_, upperLimits_));
+            solver_ik_.reset(new TRAC_IK::TRAC_IK(chain_, lower_limits_, upper_limits_));
         }
     }
 }
@@ -461,10 +461,10 @@ void DynamicModel::useUrdfDynamicParams()
     solverID_.reset(new KDL::ChainIdSolver_RNE(chain_,gravity_));
 
     // forward kinematic
-    solverFk_.reset(new KDL::ChainFkSolverPos_recursive(chain_));
+    solver_fk_.reset(new KDL::ChainFkSolverPos_recursive(chain_));
 
     //initialize TRAC_IK solver: inverse kinematics
-    solverIK_.reset(new TRAC_IK::TRAC_IK(chain_, lowerLimits_, upperLimits_));
+    solver_ik_.reset(new TRAC_IK::TRAC_IK(chain_, lower_limits_, upper_limits_));
 }
 
 

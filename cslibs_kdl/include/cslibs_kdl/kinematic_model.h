@@ -31,7 +31,7 @@ public:
     virtual ~KinematicModel();
 
     virtual bool setTreeParam(const std::string& robot_model);
-    virtual bool setTreeFile(const std::string &robot_model);
+//    virtual bool setTreeFile(const std::string &robot_model); // trac_ik currently does not support setting files!
     void setRootAndTip(const std::string& chain_root, const std::string& chain_tip);
     void setGravity(double x, double y, double z);
     void getGravity(double& gx, double& gy, double& gz);
@@ -135,14 +135,14 @@ protected:
     KDL::Chain chainFile_;
     KDL::Vector gravity_;
 
-    std::shared_ptr<KDL::ChainFkSolverPos_recursive> solverFk_;
-    std::shared_ptr<TRAC_IK::TRAC_IK> solverIK_;
-    std::shared_ptr<KDL::ChainJntToJacSolver> solverJac_;
-    std::shared_ptr<KDL::ChainIkSolverVel_pinv> solverIKVel_;
-    std::vector<std::uniform_real_distribution<double> > jointDist_;
-    std::default_random_engine randEng_;
-    KDL::JntArray lowerLimits_;
-    KDL::JntArray upperLimits_;
+    std::shared_ptr<KDL::ChainFkSolverPos_recursive> solver_fk_;
+    std::shared_ptr<TRAC_IK::TRAC_IK> solver_ik_;
+    std::shared_ptr<KDL::ChainJntToJacSolver> solver_jac_;
+    std::shared_ptr<KDL::ChainIkSolverVel_pinv> solver_ik_vel_;
+    std::vector<std::uniform_real_distribution<double> > joint_dist_;
+    std::default_random_engine rand_eng_;
+    KDL::JntArray lower_limits_;
+    KDL::JntArray upper_limits_;
 
 
 

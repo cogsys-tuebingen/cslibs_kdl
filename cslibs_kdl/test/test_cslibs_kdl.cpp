@@ -248,7 +248,7 @@ TEST(Jaco2KinematicsTests, IK)
         std::vector<double> zero;
         std::vector<double> jointAngles  = {0, M_PI, M_PI, 0, 0, M_PI};
         zero.resize(6,0);
-        int nrTests = 1000;
+        int nrTests = 10000;
         int fails = 0;
         for(int i = 0; i < nrTests; ++i){
             tf::Pose fk_pose;

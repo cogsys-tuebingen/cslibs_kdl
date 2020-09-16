@@ -85,7 +85,7 @@ bool KinematicModel::setTreeParam(const std::string &robot_model)
 bool KinematicModel::initialize()
 {
     if (!kdl_parser::treeFromUrdfModel(robot_model_, tree_)){
-        ROS_ERROR("Failed to construct kdl tree");
+        ROS_ERROR_NAMED("KinematicModel","Failed to construct kdl tree");
         return false;
     }
     if(tree_.getChain(root_,tip_,chain_)){
@@ -114,8 +114,8 @@ bool KinematicModel::initialize()
 
     }
     else{
-        ROS_WARN_STREAM("Chain extraction is not possible. Solver is not probably initalized. robot_model: " << robot_model_.name_
-                        << "; Root link: "<< root_ << "; tip: " << tip_);
+        ROS_WARN_STREAM_NAMED("KinematicModel","Chain extraction is not possible. Solver is not probably initalized. robot_model: " << robot_model_.name_
+                              << "; Root link: "<< root_ << "; tip: " << tip_);
         return false;
     }
     return true;
@@ -133,7 +133,7 @@ int KinematicModel::getFKPose(const std::vector<double> &q_in, KDL::Frame &out, 
     if(q_in.size() < chain_.getNrOfJoints()){
         //        std::string error = std::to_string(chain_.getNrOfJoints()) + " joint values expected got only " + std::to_string(q_in.size()) + "!";
         //        throw std::runtime_error(error);
-        ROS_ERROR_STREAM(chain_.getNrOfJoints() << " joint values expected got only " << q_in.size() << "!");
+        ROS_ERROR_STREAM_NAMED("KinematicModel",chain_.getNrOfJoints() << " joint values expected got only " << q_in.size() << "!");
         return KDL::SolverI::E_UNDEFINED;
     }
 
@@ -147,7 +147,7 @@ int KinematicModel::getFKPose(const std::vector<double> &q_in, KDL::Frame &out, 
         return error_code;
     }
     else{
-        ROS_ERROR_STREAM("Link " << link << " is not part of KDL chain.");
+        ROS_ERROR_STREAM_NAMED("KinematicModel","Link " << link << " is not part of KDL chain.");
         return KDL::SolverI::E_UNDEFINED;
     }
 }
@@ -157,7 +157,7 @@ int KinematicModel::getFKPose(const std::vector<double>& q_in, KDL::Frame& out, 
     if(q_in.size() < chain_.getNrOfJoints()){
         //        std::string error = std::to_string(chain_.getNrOfJoints()) + " joint values expected got only " + std::to_string(q_in.size()) + "!";
         //        throw std::runtime_error(error);
-        ROS_ERROR_STREAM(chain_.getNrOfJoints() << " joint values expected got only " << q_in.size() << "!");
+        ROS_ERROR_STREAM_NAMED("KinematicModel",chain_.getNrOfJoints() << " joint values expected got only " << q_in.size() << "!");
         return KDL::SolverI::E_UNDEFINED;
     }
 
@@ -179,7 +179,7 @@ int KinematicModel::getFKPose(const std::vector<double>& q_in, KDL::Frame& out, 
         return error_code;
     }
     else{
-        ROS_ERROR_STREAM("Link " << link << " is not part of KDL chain.");
+        ROS_ERROR_STREAM_NAMED("KinematicModel","Link " << link << " is not part of KDL chain.");
         return KDL::SolverI::E_UNDEFINED;
     }
 }
@@ -215,6 +215,27 @@ int KinematicModel::getIKSolution(const tf::Pose& pose, std::vector<double>& res
     }
     //convert tf pose to kdl frame
     cslibs_kdl::poseTFToKDL(pose,frame);
+    int error_code = solver_ik_->CartToJnt(q,frame,solution);
+    convert(solution,result);
+    return error_code;
+}
+
+int KinematicModel::getIKSolution(const KDL::Frame& frame, std::vector<double>& result, const std::vector<double> &seed)
+{
+    KDL::JntArray q(chain_.getNrOfJoints());
+    KDL::JntArray solution(chain_.getNrOfJoints());
+    if(seed.size() == 0){
+        KDL::JntArray ub, lb;
+        solver_ik_->getKDLLimits(lb, ub);
+        q.resize(chain_.getNrOfJoints());
+        for(std::size_t i = 0; i < chain_.getNrOfJoints(); ++i){
+            q(i) = joint_dist_[i](rand_eng_);
+
+        }
+    } else{
+        convert(seed,q);
+    }
+    //convert tf pose to kdl frame
     int error_code = solver_ik_->CartToJnt(q,frame,solution);
     convert(solution,result);
     return error_code;
@@ -352,9 +373,23 @@ Eigen::Matrix3d KinematicModel::getLinkFixedRotation(const std::string &link) co
         return result;
     }
     else{
-        ROS_ERROR_STREAM("Link " << link << " not found! Wrong name?");
+        ROS_ERROR_STREAM_NAMED("KinematicModel","Link " << link << " not found! Wrong name?");
         return Eigen::Matrix3d();
     }
+}
+
+std::vector<std::string> KinematicModel::getJointNames() const
+{
+    std::vector<std::string> result;
+//    result.resize(chain_.getNrOfJoints());
+    for(unsigned int i = 0; i < chain_.getNrOfSegments(); ++i){
+        const KDL::Joint& joint = chain_.getSegment(i).getJoint();
+        if(joint.getType() != KDL::Joint::None){
+            std::string name = joint.getName();
+            result.emplace_back(name);
+        }
+    }
+    return result;
 }
 
 std::vector<std::string> KinematicModel::getLinkNames() const

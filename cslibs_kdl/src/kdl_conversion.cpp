@@ -151,3 +151,18 @@ KDL::Wrench cslibs_kdl::convert(const cslibs_kdl_data::Wrench& w)
     KDL::Vector t(w.torque(0), w.torque(1), w.torque(2));
     return KDL::Wrench(f, t);
 }
+
+KDL::Rotation cslibs_kdl::convertRotation(const Eigen::Matrix3d& mat)
+{
+    KDL::Rotation res = KDL::Rotation::Identity();
+    res.data[0] = mat(0,0);
+    res.data[1] = mat(0,1);
+    res.data[2] = mat(0,2);
+    res.data[3] = mat(1,0);
+    res.data[4] = mat(1,1);
+    res.data[5] = mat(1,2);
+    res.data[6] = mat(2,0);
+    res.data[7] = mat(2,1);
+    res.data[8] = mat(2,2);
+    return  res;
+}

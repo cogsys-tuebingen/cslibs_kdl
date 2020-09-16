@@ -32,6 +32,7 @@ namespace cslibs_kdl {
      void rotationKDLToEigen(const KDL::Rotation& in, Eigen::Quaterniond& out);
 
      KDL::Wrench convert(const cslibs_kdl_data::Wrench& w);
+     KDL::Rotation convertRotation(const Eigen::Matrix3d& mat);
 
 
 

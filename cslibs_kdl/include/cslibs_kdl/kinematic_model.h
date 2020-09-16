@@ -69,6 +69,15 @@ public:
      */
     int getIKSolution(const tf::Pose &pose, std::vector<double> &result, const std::vector<double>& seed = std::vector<double>());
 
+    /**
+     * @brief getIKSolution given a end effector pose a corresponding joint configuration is search. trac_ik wrapper
+     * @param pose      input: the pose (position, orientation) of the end-effector
+     * @param result    output: the joint variables.
+     * @param seed      optional input: seed for joint value search. if not given a random seed is choosen.
+     * @return
+     */
+    int getIKSolution(const KDL::Frame& pose, std::vector<double> &result, const std::vector<double>& seed = std::vector<double>());
+
     void changeKineticParams(const std::string& link, const Eigen::Vector3d& trans, const Eigen::Matrix3d& rotation);
 
     void getRandomConfig(std::vector<double>& config);
@@ -91,6 +100,7 @@ public:
     int getNrOfJoints() const {return chain_.getNrOfJoints();}
     int getNrOfSegments() const {return chain_.getNrOfJoints();}
 
+    std::vector<std::string> getJointNames() const;
     std::vector<std::string> getLinkNames() const;
     std::string getRootLink() const {return root_;}
     std::string getTipLink() const {return tip_;}
@@ -121,6 +131,8 @@ public:
     KDL::Jacobian getJacobian(const std::vector<double>& q, int seg_id = -1) const;
     int getJointVelocities(const std::vector<double> &q, const KDL::Twist &v_in, std::vector<double>& v_out);
     inline const KDL::Tree& getTree() const {return tree_;}
+
+    inline void setRandomSeed(unsigned val){rand_eng_.seed(val);}
 
 protected:
     virtual bool initialize();

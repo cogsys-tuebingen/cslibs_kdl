@@ -13,11 +13,15 @@ struct Node{
         std::string robot_model = nh.param<std::string>("robot_description", "robot_description");
         std::string chain_root = nh.param<std::string>("chain_root", "jaco_link_base");
         std::string chain_tip = nh.param<std::string>("chain_tip", "jaco_link_hand");
+        std::vector<std::string> joint_names;
+        joint_names = nh.param<std::vector<std::string>>("joint_names", joint_names);
 
         sub_ = nh.subscribe(in_topic, 10, &Node::jointStateCb, this);
         pub_ = nh.advertise<sensor_msgs::JointState>(out_topic,3);
 
         observer_ = cslibs_kdl::ResidualVector(robot_model, chain_root, chain_tip);
+        joint_names_ = observer_.getJointNames();
+        n_joints_ = observer_.getNrOfJoints();
         data_.gx = nh.param<double>("gravity_x", 0);
         data_.gy = nh.param<double>("gravity_y", 0);
         data_.gz = nh.param<double>("gravity_z", -9.81);
@@ -27,19 +31,48 @@ struct Node{
 
     void jointStateCb(const sensor_msgs::JointState::ConstPtr& msg)
     {
-        out_msg_ = *msg;
+        
         if(first_){
-            std::vector<double> gains(msg->effort.size(), gain_);
+            std::vector<double> gains(n_joints_, gain_);
             observer_.setGains(gains);
-            last_residual_ = Eigen::VectorXd::Zero(msg->effort.size());
-            last_integral_ = Eigen::VectorXd::Zero(msg->effort.size());
+            last_residual_ = Eigen::VectorXd::Zero(n_joints_);
+            last_integral_ = Eigen::VectorXd::Zero(n_joints_);
             last_stamp_ = msg->header.stamp;
             first_ = false;
         }
         data_.dt = (msg->header.stamp - last_stamp_).toSec();
-        data_.joint_positions = msg->position;
-        data_.joint_velocities = msg->velocity;
-        data_.torques = msg->effort;
+        if(n_joints_ != msg->name.size()){
+           data_.resize(n_joints_);
+           auto it_d_pos = data_.joint_positions.begin();
+           auto it_d_vel = data_.joint_velocities.begin();
+           auto it_d_torque = data_.torques.begin();
+
+            for(const std::string& j : joint_names_){
+                auto it_pos = msg->position.begin();
+                auto it_vel = msg->velocity.begin();
+                auto it_torque = msg->effort.begin();
+                for(const std::string& msg_j_name : msg->name){
+                    if(j == msg_j_name){
+                        *it_d_pos = *it_pos;
+                        *it_d_vel = *it_vel;
+                        *it_d_torque = *it_torque;
+                        break;
+                    }
+                    ++it_pos;
+                    ++it_vel;
+                    ++it_torque;
+                }
+                ++it_pos;
+                ++it_vel;
+                ++it_torque;
+            }
+
+        } else {
+            out_msg_ = *msg;
+            data_.joint_positions = msg->position;
+            data_.joint_velocities = msg->velocity;
+            data_.torques = msg->effort;
+        }
         Eigen::VectorXd new_integral, new_residual;
         observer_.getResidualVector(data_, last_residual_, last_integral_, new_integral, new_residual);
 
@@ -70,6 +103,8 @@ struct Node{
     sensor_msgs::JointState out_msg_;
     cslibs_kdl::ResidualData  data_;
     cslibs_kdl::ResidualVector observer_;
+    std::vector<std::string> joint_names_;
+    std::size_t n_joints_;
     double gain_;
 };
 

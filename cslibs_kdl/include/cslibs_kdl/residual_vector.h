@@ -50,6 +50,7 @@ public:
                         std::vector<KDL::Twist > &spatial_acc );
 
     std::vector<std::string> getLinkNames() const;
+    std::vector<std::string> getJointNames() const;
 
     static void vector2EigenVector(const std::vector<double>& vec, Eigen::VectorXd& res);
     static void eigenVector2vector(const Eigen::VectorXd &vec, std::vector<double> &res);

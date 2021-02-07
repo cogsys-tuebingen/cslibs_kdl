@@ -31,7 +31,7 @@ struct Node{
 
     void jointStateCb(const sensor_msgs::JointState::ConstPtr& msg)
     {
-        
+        out_msg_.header = msg->header;
         if(first_){
             std::vector<double> gains(n_joints_, gain_);
             observer_.setGains(gains);
@@ -39,13 +39,15 @@ struct Node{
             last_integral_ = Eigen::VectorXd::Zero(n_joints_);
             last_stamp_ = msg->header.stamp;
             first_ = false;
+            
         }
         data_.dt = (msg->header.stamp - last_stamp_).toSec();
         if(n_joints_ != msg->name.size()){
-           data_.resize(n_joints_);
-           auto it_d_pos = data_.joint_positions.begin();
-           auto it_d_vel = data_.joint_velocities.begin();
-           auto it_d_torque = data_.torques.begin();
+            out_msg_.name = joint_names_;
+            data_.resize(n_joints_);
+            auto it_d_pos = data_.joint_positions.begin();
+            auto it_d_vel = data_.joint_velocities.begin();
+            auto it_d_torque = data_.torques.begin();
 
             for(const std::string& j : joint_names_){
                 auto it_pos = msg->position.begin();
@@ -62,10 +64,13 @@ struct Node{
                     ++it_vel;
                     ++it_torque;
                 }
-                ++it_pos;
-                ++it_vel;
-                ++it_torque;
+                ++it_d_pos;
+                ++it_d_vel;
+                ++it_d_torque;
             }
+            out_msg_.position = data_.joint_positions;
+            out_msg_.velocity = data_.joint_velocities;
+            out_msg_.effort = data_.torques;
 
         } else {
             out_msg_ = *msg;
@@ -73,6 +78,7 @@ struct Node{
             data_.joint_velocities = msg->velocity;
             data_.torques = msg->effort;
         }
+        
         Eigen::VectorXd new_integral, new_residual;
         observer_.getResidualVector(data_, last_residual_, last_integral_, new_integral, new_residual);
 

@@ -220,6 +220,11 @@ std::vector<std::string> ResidualVector::getLinkNames() const
     return model_.getLinkNames();
 }
 
+std::vector<std::string> ResidualVector::getJointNames() const
+{
+    return model_.getJointNames();
+}
+
 void ResidualVector::vector2EigenVector(const std::vector<double> &vec, Eigen::VectorXd &res)
 {
     res.resize(vec.size());

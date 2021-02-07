@@ -92,6 +92,7 @@ public:
     int getNrOfSegments() const {return chain_.getNrOfJoints();}
 
     std::vector<std::string> getLinkNames() const;
+    std::vector<std::string> getJointNames() const;
     std::string getRootLink() const {return root_;}
     std::string getTipLink() const {return tip_;}
 

@@ -369,6 +369,17 @@ std::vector<std::string> KinematicModel::getLinkNames() const
     return result;
 }
 
+std::vector<std::string> KinematicModel::getJointNames() const
+{
+    std::vector<std::string> result;
+    result.resize(chain_.getNrOfJoints());
+    for(unsigned int i = 0; i < chain_.getNrOfJoints(); ++i){
+        std::string name = chain_.getSegment(i).getJoint().getName();
+        result[i] = name;
+    }
+    return result;
+}
+
 double  KinematicModel::getUpperJointLimit(const std::size_t id) const
 {
     if(upper_limits_.rows() > id){

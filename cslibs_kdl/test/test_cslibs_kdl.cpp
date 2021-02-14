@@ -7,6 +7,7 @@
 #include <Eigen/Core>
 #include <Eigen/LU>
 #include <Eigen/SVD>
+#include <ros/package.h>
 
 #include <cslibs_kdl/dynamic_model.h>
 #include <cslibs_kdl/kdl_conversion.h>
@@ -83,7 +84,7 @@ TEST(Jaco2KinematicsDynamicsToolTests, KinParam)
     Eigen::Matrix3d rot = jaco2KDL.getLinkFixedRotation("jaco_link_1");
     EXPECT_NEAR(trans(0), 0, 1e-4);
     EXPECT_NEAR(trans(1), 0, 1e-4);
-    EXPECT_NEAR(trans(2), 0.15675, 1e-4);
+    EXPECT_NEAR(trans(2), 0.1535, 1e-4);
     EXPECT_NEAR(rot(0,0),  1, 1e-4);
     EXPECT_NEAR(rot(0,1),  0, 1e-4);
     EXPECT_NEAR(rot(0,2),  0, 1e-4);
@@ -166,7 +167,7 @@ TEST(Jaco2DynamicsTests,inverseDynamics)
 TEST(Jaco2KinematicsTests, fk)
 {
     std::vector<double> q = {0, M_PI, M_PI, 0, 0, M_PI};
-    tf::Vector3 posH(-0.000, 0.0611, 1.021);
+    tf::Vector3 posH(-0.000, 0.0629, 1.018);
     tf::Quaternion rotH(-0.707, 0.707, -0.000, 0.000);
     tf::Pose res;
     int ec = jaco2KDL.getFKPose(q,res,"jaco_link_hand");
@@ -179,7 +180,7 @@ TEST(Jaco2KinematicsTests, fk)
     EXPECT_NEAR(rotH.getZ(), res.getRotation().getZ(), 1e-3);
     EXPECT_NEAR(rotH.getW(), res.getRotation().getW(), 1e-3);
 
-    tf::Vector3 pos5(-0.000, 0.024, 0.957);
+    tf::Vector3 pos5(-0.000, 0.024, 0.9549);
     tf::Quaternion rot5(-0.612, 0.612, -0.354, -0.354);
     tf::Pose res5;
     ec = jaco2KDL.getFKPose(q,res5,"jaco_link_5");
@@ -191,8 +192,9 @@ TEST(Jaco2KinematicsTests, fk)
     EXPECT_NEAR(rot5.getY(), res5.getRotation().getY(), 1e-3);
     EXPECT_NEAR(rot5.getZ(), res5.getRotation().getZ(), 1e-3);
     EXPECT_NEAR(rot5.getW(), res5.getRotation().getW(), 1e-3);
-
-
+    KDL::Frame T1;
+    ec = jaco2KDL.getFKPose(q,T1,"jaco_link_1");
+    EXPECT_TRUE(ec>=0);
 }
 
 TEST(Jaco2DynamicsToolsTests, changeDynParam)
@@ -691,8 +693,10 @@ int main(int argc, char *argv[])
     ros::NodeHandle node("~");
     std::string robot_desc_string;
     //    node.getParam("/robot_description", robot_desc_string);//, std::string(""));
-    std::string urdf_param("robot_description");
-    jaco2KDL = DynamicModel(urdf_param,"jaco_link_base","jaco_link_hand");
+//    std::string urdf_param("robot_description");
+    std::string urdf_path = ros::package::getPath("cslibs_kdl");
+    urdf_path += "/test/jaco.urdf";
+    jaco2KDL = DynamicModel(urdf_path,"jaco_link_base","jaco_link_hand");
 
     return RUN_ALL_TESTS();
 }

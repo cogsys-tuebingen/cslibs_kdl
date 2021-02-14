@@ -63,12 +63,14 @@ add_dependencies(cslibs_kdl ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTE
 ## Declare a C++ executable
 add_executable(cslibs_kdl_tf_static_transforms_conversion src/cslibs_kdl_tf_static_tranforms_conversion.cpp)
 add_executable(cslibs_kdl_test test/test_cslibs_kdl.cpp)
+add_executable(cslibs_kdl_sawyer_test test/test_sawyer.cpp)
 add_executable(external_torque_observer src/node/external_torque_observer.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 add_dependencies(cslibs_kdl_tf_static_transforms_conversion ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} cslibs_kdl)
 add_dependencies(cslibs_kdl_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${GTEST_LIBRARIES} cslibs_kdl)
+add_dependencies(cslibs_kdl_sawyer_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${GTEST_LIBRARIES} cslibs_kdl)
 add_dependencies(external_torque_observer ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} cslibs_kdl)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(cslibs_kdl
@@ -83,6 +85,13 @@ target_link_libraries(cslibs_kdl_tf_static_transforms_conversion
     )
 
 target_link_libraries(cslibs_kdl_test
+    ${catkin_LIBRARIES}
+    ${orocos_kdl_LIBRARIES}
+    ${GTEST_LIBRARIES}
+    cslibs_kdl
+    )
+
+target_link_libraries(cslibs_kdl_sawyer_test
     ${catkin_LIBRARIES}
     ${orocos_kdl_LIBRARIES}
     ${GTEST_LIBRARIES}

@@ -104,10 +104,10 @@ protected:
     bool use_fingers_;
     bool set_model_;
     bool init_sensor_mat_;
-    KinematicModel model_;
-    KinematicModel model_f1_;
-    KinematicModel model_f2_;
-    KinematicModel model_f3_;
+    std::shared_ptr<KinematicModel> model_;
+    std::shared_ptr<KinematicModel> model_f1_;
+    std::shared_ptr<KinematicModel> model_f2_;
+    std::shared_ptr<KinematicModel> model_f3_;
     std::size_t n_joints_;
     Eigen::MatrixXd sensor_mat_;
     std::vector<std::string> link_names_;

@@ -25,37 +25,37 @@ KinematicModel::KinematicModel(const std::string &robot_model, const std::string
     urdf_param_(robot_model), root_(chain_root), tip_(chain_tip), gravity_(0,0,-9.81)
 {
 
-    //    if(boost::filesystem::exists(robot_model)){
-    //        ROS_DEBUG_NAMED("KinematicModel","Load robot model from file.");
-    //        if(!robot_model_.initFile(robot_model)){
-    //            ROS_ERROR("Failed to pars urdf file");
-    //        }
-    //    }
-    //    else{
+    if(boost::filesystem::exists(robot_model)){
+        ROS_DEBUG_NAMED("KinematicModel","Load robot model from file.");
+        if(!robot_model_.initFile(robot_model)){
+            ROS_ERROR("Failed to pars urdf file");
+        }
+    }
+    else{
 
-    ros::NodeHandle node_handle("~");
+        ros::NodeHandle node_handle("~");
 
-    std::string xml_string;
+        std::string xml_string;
 
-    std::string urdf_xml,full_urdf_xml;
-    node_handle.param("urdf_xml",urdf_xml,urdf_param_);
-    node_handle.searchParam(urdf_xml,full_urdf_xml);
+        std::string urdf_xml,full_urdf_xml;
+        node_handle.param("urdf_xml",urdf_xml,urdf_param_);
+        node_handle.searchParam(urdf_xml,full_urdf_xml);
 
-    ROS_DEBUG_NAMED("KinematicModel","Reading xml file from parameter server");
-    if (!node_handle.getParam(full_urdf_xml, xml_string))
-    {
-        ROS_FATAL_NAMED("KinematicModel","Could not load the xml from parameter server: %s", urdf_xml.c_str());
-        return;
+        ROS_DEBUG_NAMED("KinematicModel","Reading xml file from parameter server");
+        if (!node_handle.getParam(full_urdf_xml, xml_string))
+        {
+            ROS_FATAL_NAMED("KinematicModel","Could not load the xml from parameter server: %s", urdf_xml.c_str());
+            return;
+        }
+
+        node_handle.param(full_urdf_xml,xml_string,std::string());
+        robot_model_.initString(xml_string);
     }
 
-    node_handle.param(full_urdf_xml,xml_string,std::string());
-    robot_model_.initString(xml_string);
-    //    }
     bool init = initialize();
     if(!init){
         throw std::runtime_error("Could not initialize FK");
     }
-
     ROS_DEBUG_STREAM_NAMED("KinematicModel",
                            "Number of Joints: " << chain_.getNrOfJoints() <<
                            " | Number of Segments: " << chain_.getNrOfSegments());
@@ -73,12 +73,12 @@ bool KinematicModel::setTreeParam(const std::string &robot_model)
     return initialize();
 }
 
-//bool KinematicModel::setTreeFile(const std::string &robot_model)
-//{
-//    robot_model_.initFile(robot_model);
-//    urdf_param_ = robot_model_.getName();
-//    return initialize();
-//}
+bool KinematicModel::setTreeFile(const std::string &robot_model)
+{
+    robot_model_.initFile(robot_model);
+    urdf_param_ = robot_model;
+    return initialize();
+}
 
 
 
@@ -99,9 +99,33 @@ bool KinematicModel::initialize()
         solver_ik_vel_.reset(new KDL::ChainIkSolverVel_pinv(chain_));
 
         //initialize TRAC_IK solver: inverse kinematics
-        solver_ik_.reset(new TRAC_IK::TRAC_IK(root_, tip_, urdf_param_));
+        urdf::JointConstSharedPtr joint;
+        lower_limits_.resize(chain_.getNrOfJoints());
+        upper_limits_.resize(chain_.getNrOfJoints());
+        unsigned int joint_num = 0;
+        for (unsigned int i = 0; i < chain_.getNrOfSegments(); ++i) {
+            joint = robot_model_.getJoint(chain_.getSegment(i).getJoint().getName());
+            if (joint->type != urdf::Joint::UNKNOWN && joint->type != urdf::Joint::FIXED) {
+              joint_num++;
+              double lower = std::numeric_limits<double>::lowest();
+              double upper = std::numeric_limits<double>::max();
+              if (joint->type != urdf::Joint::CONTINUOUS) {
+                if (joint->safety) {
+                  lower = std::max(joint->limits->lower, joint->safety->soft_lower_limit);
+                  upper = std::min(joint->limits->upper, joint->safety->soft_upper_limit);
+                } else {
+                  lower = joint->limits->lower;
+                  upper = joint->limits->upper;
+                }
+              }
+              lower_limits_(joint_num - 1) = lower;
+              upper_limits_(joint_num - 1) = upper;
+              ROS_DEBUG_STREAM_NAMED("cslibs_kdl", "Kinematics Using joint " << joint->name << " " << lower_limits_(joint_num - 1) << " " << upper_limits_(joint_num - 1));
+            }
+          }
 
-        solver_ik_->getKDLLimits(lower_limits_, upper_limits_);
+        solver_ik_.reset(new TRAC_IK::TRAC_IK(chain_, lower_limits_, upper_limits_));
+
         joint_dist_.resize(chain_.getNrOfJoints());
         if(lower_limits_.rows() < chain_.getNrOfJoints() || upper_limits_.rows() < chain_.getNrOfJoints()){
             throw std::runtime_error("Empty joint limits! Trac IK not properly initialized! #(joints): " +
@@ -140,10 +164,15 @@ int KinematicModel::getFKPose(const std::vector<double> &q_in, KDL::Frame &out, 
     KDL::JntArray q;
     convert(q_in, q, q_in.size() - chain_.getNrOfJoints());
 
+
     int segId = getKDLSegmentIndexFK(link);
 
     if(segId > -2){
         int error_code = solver_fk_->JntToCart(q, out, segId);
+        if(error_code < 0){
+            std::cout << chain_.getNrOfSegments() << " | " <<chain_.getNrOfJoints() << " | " << q.rows() << " | " << q.columns()<< std::endl;
+            ROS_ERROR_STREAM_NAMED("KinematicModel", "Errror: =====> " << solver_fk_->strError(error_code));
+        }
         return error_code;
     }
     else{
@@ -381,7 +410,7 @@ Eigen::Matrix3d KinematicModel::getLinkFixedRotation(const std::string &link) co
 std::vector<std::string> KinematicModel::getJointNames() const
 {
     std::vector<std::string> result;
-//    result.resize(chain_.getNrOfJoints());
+    //    result.resize(chain_.getNrOfJoints());
     for(unsigned int i = 0; i < chain_.getNrOfSegments(); ++i){
         const KDL::Joint& joint = chain_.getSegment(i).getJoint();
         if(joint.getType() != KDL::Joint::None){
@@ -407,7 +436,7 @@ std::vector<std::string> KinematicModel::getLinkNames() const
 double  KinematicModel::getUpperJointLimit(const std::size_t id) const
 {
     if(upper_limits_.rows() > id){
-        return upper_limits_(id);
+        return upper_limits_(static_cast<unsigned int>(id));
     }
     else{
         return 0;
@@ -417,7 +446,7 @@ double  KinematicModel::getUpperJointLimit(const std::size_t id) const
 double  KinematicModel::getLowerJointLimit(const std::size_t id) const
 {
     if(lower_limits_.rows() > id){
-        return lower_limits_(id);
+        return lower_limits_(static_cast<unsigned int>(id));
     }
     else{
         return 0;
@@ -441,10 +470,10 @@ KDL::Twist KinematicModel::getJointAxisProjection(const std::string &link) const
 
 std::vector<KDL::Twist> KinematicModel::getJointAxisProjections() const
 {
-    int ns = chain_.getNrOfSegments();
+    unsigned int ns = chain_.getNrOfSegments();
     std::vector<KDL::Twist> res(ns);
     auto it = res.begin();
-    for(int i = 0;  i < ns; i++, it++){;
+    for(unsigned int i = 0;  i < ns; i++, it++){;
         KDL::Frame X = chain_.getSegment(i).pose(0);//Remark this is the inverse of the
         (*it) = X.M.Inverse(chain_.getSegment(i).twist(0,1.0));
     }
@@ -465,7 +494,7 @@ KDL::Jacobian KinematicModel::getJacobian(const std::vector<double> &q, int seg_
     if(q.size() > nj ){
         throw std::logic_error("Dimension mismatch. More joint values expected");
     }
-    KDL::Jacobian jac(nj);
+    KDL::Jacobian jac(static_cast<unsigned int>(nj));
 
     KDL::JntArray qvals;
     convert(q, qvals, q.size() - nj);
@@ -484,7 +513,7 @@ int KinematicModel::getJointVelocities(const std::vector<double> &q, const KDL::
     convert(q, qvals, q.size() - nj);
 
     KDL::JntArray out;
-    out.resize(nj);
+    out.resize(static_cast<unsigned int>(nj));
     int ec = solver_ik_vel_->CartToJnt(qvals,v_in, out);
     convert(out, v_out);
 

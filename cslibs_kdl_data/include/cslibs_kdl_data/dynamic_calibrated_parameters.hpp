@@ -16,7 +16,8 @@ struct EIGEN_ALIGN16 DynamicParameters
 
 };
 
-typedef std::vector<cslibs_kdl_calibration::DynamicParameters, Eigen::aligned_allocator<Eigen::Matrix3d>> DynamicParametersCollection;
+typedef std::vector<cslibs_kdl_calibration::DynamicParameters,
+    Eigen::aligned_allocator<cslibs_kdl_calibration::DynamicParameters>> DynamicParametersCollection;
 
 
 inline void to_vector(const cslibs_kdl_calibration::DynamicParametersCollection& in, std::vector<double>& out, std::vector<std::string>& links,
